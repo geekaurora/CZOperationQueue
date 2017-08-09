@@ -14,9 +14,8 @@ extension Operation {
 }
 
 open class GPOperationQueue: NSObject {
-    typealias Operations = CZOperationsManager
     var maxConcurrentOperationCount: Int
-    fileprivate lazy var operationsManager = Operations()
+    fileprivate var operationsManager: CZOperationsManager
     /** CZDispatchQueue */
     /// Serial queue acting as gate keeper, to ensure only one thread is blocked
     fileprivate let gateKeeperQueue: DispatchQueue
@@ -29,13 +28,10 @@ open class GPOperationQueue: NSObject {
         func prefix(_ label: String) -> String {
             return label + "." + self.rawValue
         }
-    }
-    
-    deinit {
-        removeObserver(self, forKeyPath: config.kOpFinishedKeyPath)
-    }
+    }    
     
     override init() {
+        operationsManager = CZOperationsManager()
         maxConcurrentOperationCount = config.maxConcurrentOperationCount
         let label = config.label
         let maxConcurrentCount = maxConcurrentOperationCount
@@ -51,6 +47,7 @@ open class GPOperationQueue: NSObject {
                                  attributes:  [.concurrent]
         )
         super.init()
+        operationsManager.delegate = self
     }
 
     open func addOperation(_ op: Operation) {
@@ -63,6 +60,14 @@ open class GPOperationQueue: NSObject {
     }
 }
 
+extension GPOperationQueue: CZOperationsManagerDelegate {
+    func operation(_ op: Operation, isFinished: Bool) {
+        if isFinished {
+            _runNextOperations()
+        }
+    }
+}
+
 private var kOpObserverContext: Int = 0
 fileprivate extension GPOperationQueue {
     fileprivate struct config {
@@ -72,7 +77,6 @@ fileprivate extension GPOperationQueue {
     }
 
     func _addOperation(_ op: Operation, byAddOperations: Bool = false) {
-        op.addObserver(self, forKeyPath: config.kOpFinishedKeyPath, options: [.new, .old], context: &kOpObserverContext)
         operationsManager.append(op)
         if (!byAddOperations) {
             _runNextOperations()
@@ -98,15 +102,4 @@ fileprivate extension GPOperationQueue {
     }
 }
 
-extension GPOperationQueue {
-    open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        guard let newValue = change?[.newKey] as? Bool,
-            let oldValue = change?[.oldKey] as? Bool,
-            newValue != oldValue,
-            context == &kOpObserverContext,
-            config.kOpFinishedKeyPath == keyPath else {
-                return
-        }
-        _runNextOperations()
-    }
-}
+

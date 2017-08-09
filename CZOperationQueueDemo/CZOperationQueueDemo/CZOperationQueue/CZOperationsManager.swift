@@ -8,12 +8,20 @@
 
 import UIKit
 
+protocol CZOperationsManagerDelegate: class {
+    func operation(_ op: Operation, isFinished: Bool)
+}
+
 /// Thread-safe operations manager
 class CZOperationsManager: NSObject {
     typealias DequeueClosure = (Operation, inout [Operation]) -> Void
     typealias SubOperationQueues = [Operation.QueuePriority: [Operation]]
     fileprivate lazy var subOperationQueuesLock: CZMutexLock<SubOperationQueues> = CZMutexLock(SubOperationQueues())
     fileprivate static let priorityOrder: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
+    weak var delegate: CZOperationsManagerDelegate?
+
+    deinit { removeObserver(self, forKeyPath: config.kOpFinishedKeyPath) }
+
     override init() {
         super.init()
     }
@@ -28,6 +36,7 @@ class CZOperationsManager: NSObject {
     }
 
     func append(_ operation: Operation) {
+        operation.addObserver(self, forKeyPath: config.kOpFinishedKeyPath, options: [.new, .old], context: &kOpObserverContext)
         subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
             if subOperationQueues[operation.queuePriority] == nil {
                 subOperationQueues[operation.queuePriority] = []
@@ -51,6 +60,32 @@ class CZOperationsManager: NSObject {
         }
     }
 }
+
+private var kOpObserverContext: Int = 0
+fileprivate extension CZOperationsManager {
+    fileprivate struct config {
+        static let maxConcurrentOperationCount = 128
+        static let label = "com.tony.underlyingQueue"
+        static let kOpFinishedKeyPath = "isFinished"
+    }
+}
+
+extension CZOperationsManager {
+    open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        guard let newValue = change?[.newKey] as? Bool,
+            let oldValue = change?[.oldKey] as? Bool,
+            newValue != oldValue,
+            context == &kOpObserverContext,
+            config.kOpFinishedKeyPath == keyPath else {
+                return
+        }
+        if let object = object as? Operation,
+           let delegate = delegate {
+            delegate.operation(object, isFinished: true)
+        }
+    }
+}
+
 
 extension Array where Element: Equatable {
     mutating func remove(_ object: Element) {
