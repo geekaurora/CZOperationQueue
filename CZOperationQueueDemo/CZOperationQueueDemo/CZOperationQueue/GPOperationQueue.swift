@@ -18,7 +18,7 @@ open class GPOperationQueue: NSObject {
     var maxConcurrentOperationCount: Int
     //var underlyingQueue: CZDispatchQueue
 
-    fileprivate lazy var operationsLock: CZMutexLock<Operations> = CZMutexLock(Operations())
+    fileprivate lazy var operationsManager = Operations()
     /** CZDispatchQueue */
     /// Serial queue acting as gate keeper, to ensure only one thread is blocked
     fileprivate let gateKeeperQueue: DispatchQueue
@@ -74,11 +74,8 @@ fileprivate extension GPOperationQueue {
     }
 
     func _addOperation(_ op: Operation, byAddOperations: Bool = false) {
-        operationsLock.writeLock { (operations) -> Operations? in
-            op.addObserver(self, forKeyPath: config.kOpFinishedKeyPath, options: [.new, .old], context: &kOpObserverContext)
-            operations.append(op)
-            return operations
-        }
+        op.addObserver(self, forKeyPath: config.kOpFinishedKeyPath, options: [.new, .old], context: &kOpObserverContext)
+        operationsManager.append(op)
         if (!byAddOperations) {
             _runNextOperations()
         }
@@ -86,20 +83,17 @@ fileprivate extension GPOperationQueue {
 
     func _runNextOperations() {
         self.semaphore.wait()
-        operationsLock.writeLock {(operations) -> Operations? in
-            operations.dequeueFirstReadyOp { (op, subqueue) in
-                subqueue.remove(op)
-                if let op = op as? TestOperation {
-                    print("dequeued op: \(op.jobIndex)")
-                }
-                self.jobQueue.async {
-                    if (op.canStart) {
-                        op.start()
-                        self.semaphore.signal()
-                    }
+        operationsManager.dequeueFirstReadyOp { (op, subqueue) in
+            subqueue.remove(op)
+            if let op = op as? TestOperation {
+                print("dequeued op: \(op.jobIndex)")
+            }
+            self.jobQueue.async {
+                if (op.canStart) {
+                    op.start()
+                    self.semaphore.signal()
                 }
             }
-            return operations
         }
     }
 }
