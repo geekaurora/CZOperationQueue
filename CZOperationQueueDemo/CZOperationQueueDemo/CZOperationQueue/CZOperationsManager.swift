@@ -56,12 +56,12 @@ class CZOperationsManager: NSObject {
             subOperationQueues[operation.queuePriority]!.append(operation)
             return subOperationQueues
         }
-    }
+    } 
 
     func dequeueFirstReadyOp(dequeueClosure: @escaping DequeueClosure) {
         subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
             for priority in CZOperationsManager.priorityOrder {
-                // Shouldn't assign? - Copy: var subqueue = subOperationQueues[priority]
+                // Shouldn't assign to new variable? - Copy: var subqueue = subOperationQueues[priority]
                 guard subOperationQueues[priority] != nil else { continue }
                 if let op =  subOperationQueues[priority]?.first(where: {$0.canStart}) {
                     subOperationQueues[priority]!.remove(op)
