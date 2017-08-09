@@ -39,7 +39,7 @@ class GPOperationQueueTester {
 
     func test() {
         testDataManager.removeAll()
-        gpOperationQueue = GPOperationQueue(maxConcurrentOperationCount: 1)
+        gpOperationQueue = GPOperationQueue(maxConcurrentOperationCount: 3)
 
         let operations = (0...10).map {TestOperation($0, testDataManager: testDataManager)}
         operations[0].queuePriority = .veryLow
@@ -49,9 +49,7 @@ class GPOperationQueueTester {
         gpOperationQueue?.addOperations(operations, waitUntilFinished: true)
 
         DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 3) {[weak self] in
-            guard let `self` = self else {
-                return
-            }
+            guard let `self` = self else { return }
             let operation = TestOperation(11, testDataManager: self.testDataManager)
             operation.queuePriority = .veryHigh
             self.gpOperationQueue?.addOperation(operation)

@@ -52,7 +52,9 @@ fileprivate extension GPOperationQueue {
     }
 
     func _runNextOperations() {
-        while (!operationsManager.isEmpty && !operationsManager.reachedMaxConcurrentCount) {
+        print("\(#function): curr operation count: \(operationsManager.operations.count); canExecuteNewOp: \(operationsManager.canExecuteNewOperation)")
+        
+        while (operationsManager.canExecuteNewOperation) {
             operationsManager.dequeueFirstReadyOp { (op, subqueue) in
                 if let op = op as? TestOperation {
                     print("dequeued op: \(op.jobIndex)")

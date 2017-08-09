@@ -44,6 +44,9 @@ class CZOperationsManager: NSObject {
     var isEmpty: Bool {
         return operations.isEmpty
     }
+    var canExecuteNewOperation: Bool {
+        return !isEmpty && !reachedMaxConcurrentCount
+    }
 
     func append(_ operation: Operation) {
         operation.addObserver(self, forKeyPath: config.kOpFinishedKeyPath, options: [.new, .old], context: &kOpObserverContext)
@@ -79,8 +82,6 @@ class CZOperationsManager: NSObject {
 private var kOpObserverContext: Int = 0
 fileprivate extension CZOperationsManager {
     fileprivate struct config {
-        static let maxConcurrentOperationCount = 128
-        static let label = "com.tony.underlyingQueue"
         static let kOpFinishedKeyPath = "isFinished"
     }
 }
@@ -105,7 +106,6 @@ extension CZOperationsManager {
         }
     }
 }
-
 
 extension Array where Element: Equatable {
     mutating func remove(_ object: Element) {
