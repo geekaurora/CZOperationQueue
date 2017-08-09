@@ -15,6 +15,7 @@ open class GPOperationQueue: NSObject {
     }
     fileprivate var operationsManager: CZOperationsManager
     fileprivate let jobQueue: DispatchQueue
+    fileprivate let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
     var operations: [Operation] {
         return operationsManager.operations
     }
@@ -33,6 +34,9 @@ open class GPOperationQueue: NSObject {
     open func addOperations(_ ops: [Operation], waitUntilFinished wait: Bool) {
         ops.forEach { _addOperation($0, byAddOperations: true) }
         _runNextOperations()
+
+        // Sync execute: block current thread to wait until all operations finished
+        waitingSemaphore.wait()
     }
 
     open func cancelAllOperations() {
@@ -43,7 +47,11 @@ open class GPOperationQueue: NSObject {
 extension GPOperationQueue: CZOperationsManagerDelegate {
     func operation(_ op: Operation, isFinished: Bool) {
         if isFinished {
-            _runNextOperations()
+            if operationsManager.allOperationsFinished {
+                _notifyOperationsFinished()
+            } else {
+                _runNextOperations()
+            }
         }
     }
 }
@@ -52,6 +60,10 @@ fileprivate extension GPOperationQueue {
     fileprivate struct config {
         static let maxConcurrentOperationCount: Int = .max
         static let label = "com.tony.underlyingQueue"
+    }
+
+    func _notifyOperationsFinished() {
+        waitingSemaphore.signal()
     }
 
     func _addOperation(_ op: Operation, byAddOperations: Bool = false) {

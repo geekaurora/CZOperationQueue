@@ -27,14 +27,16 @@ class CZOperationQueueDemoTests: XCTestCase {
     
     func testBasic() {
         let operations = (0...10).map {TestOperation($0, testDataManager: testDataManager)}
-        // Priority
+        // Set priorities
         operations[0].queuePriority = .veryLow
         operations[1].queuePriority = .low
         operations[6].queuePriority = .veryHigh
-        // Dependency
+        // Set dependencies
         operations[8].addDependency(operations[0])
+        // Add operations to CZOperationQueue and start
         gpOperationQueue?.addOperations(operations, waitUntilFinished: true)
 
+        // Test cases
         let index0 = testDataManager.index(of: 0)!
         let index1 = testDataManager.index(of: 1)!
         let index6 = testDataManager.index(of: 6)!

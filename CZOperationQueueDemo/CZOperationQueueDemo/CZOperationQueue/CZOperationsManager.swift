@@ -21,6 +21,11 @@ class CZOperationsManager: NSObject {
     fileprivate static let priorityOrder: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
     var maxConcurrentOperationCount: Int = .max
     weak var delegate: CZOperationsManagerDelegate?
+    fileprivate var executingOperations: [Operation] {
+        return executingOperationsLock.readLock({ (operations) -> [Operation]? in
+            return operations
+        }) ?? []
+    }
     deinit { removeObserver(self, forKeyPath: config.kOpFinishedKeyPath) }
 
     override init() {
@@ -45,6 +50,9 @@ class CZOperationsManager: NSObject {
     }
     var canExecuteNewOperation: Bool {
         return hasReadyOperation && !reachedMaxConcurrentCount
+    }
+    var allOperationsFinished: Bool {
+        return operations.isEmpty && executingOperations.isEmpty
     }
 
     func append(_ operation: Operation) {
