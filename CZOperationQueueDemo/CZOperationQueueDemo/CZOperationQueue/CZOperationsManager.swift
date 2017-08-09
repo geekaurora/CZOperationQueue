@@ -19,12 +19,11 @@ class CZOperationsManager: NSObject {
     fileprivate lazy var subOperationQueuesLock: CZMutexLock<SubOperationQueues> = CZMutexLock(SubOperationQueues())
     fileprivate lazy var executingOperationsLock: CZMutexLock<[Operation]> = CZMutexLock([Operation]())
     fileprivate static let priorityOrder: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
-    fileprivate let maxConcurrentOperationCount: Int
+    var maxConcurrentOperationCount: Int = .max
     weak var delegate: CZOperationsManagerDelegate?
     deinit { removeObserver(self, forKeyPath: config.kOpFinishedKeyPath) }
 
-    required init(maxConcurrentOperationCount: Int) {
-        self.maxConcurrentOperationCount = maxConcurrentOperationCount
+    override init() {
         super.init()
     }
 

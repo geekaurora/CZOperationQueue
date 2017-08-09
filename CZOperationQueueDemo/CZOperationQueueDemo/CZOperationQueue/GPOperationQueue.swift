@@ -8,13 +8,16 @@
 import UIKit
 
 open class GPOperationQueue: NSObject {
-    var maxConcurrentOperationCount: Int
+    var maxConcurrentOperationCount: Int = .max {
+        didSet {
+            operationsManager.maxConcurrentOperationCount = maxConcurrentOperationCount
+        }
+    }
     fileprivate var operationsManager: CZOperationsManager
     fileprivate let jobQueue: DispatchQueue
 
-    required public init(maxConcurrentOperationCount: Int = config.maxConcurrentOperationCount) {
-        self.maxConcurrentOperationCount = maxConcurrentOperationCount
-        operationsManager = CZOperationsManager(maxConcurrentOperationCount: maxConcurrentOperationCount)
+    override init() {
+        operationsManager = CZOperationsManager()
         jobQueue = DispatchQueue(label: config.label, attributes:  [.concurrent])
         super.init()
         operationsManager.delegate = self
@@ -56,9 +59,9 @@ fileprivate extension GPOperationQueue {
         
         while (operationsManager.canExecuteNewOperation) {
             operationsManager.dequeueFirstReadyOp { (op, subqueue) in
-                if let op = op as? TestOperation {
-                    print("dequeued op: \(op.jobIndex)")
-                }
+//                if let op = op as? TestOperation {
+//                    print("dequeued op: \(op.jobIndex)")
+//                }
                 self.jobQueue.async {
                     if (op.canStart) {
                         op.start()

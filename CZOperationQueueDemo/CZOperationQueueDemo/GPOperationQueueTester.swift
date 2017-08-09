@@ -39,8 +39,9 @@ class GPOperationQueueTester {
 
     func test() {
         testDataManager.removeAll()
-        gpOperationQueue = GPOperationQueue(maxConcurrentOperationCount: 3)
-
+        gpOperationQueue = GPOperationQueue()
+        gpOperationQueue?.maxConcurrentOperationCount = 3
+        
         let operations = (0...10).map {TestOperation($0, testDataManager: testDataManager)}
         operations[0].queuePriority = .veryLow
         operations[1].queuePriority = .low
