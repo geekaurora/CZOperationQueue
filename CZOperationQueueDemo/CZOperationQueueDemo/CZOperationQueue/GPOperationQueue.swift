@@ -31,8 +31,9 @@ open class GPOperationQueue: NSObject {
     }    
     
     override init() {
-        operationsManager = CZOperationsManager()
         maxConcurrentOperationCount = config.maxConcurrentOperationCount
+        operationsManager = CZOperationsManager(maxConcurrentOperationCount: maxConcurrentOperationCount)
+        
         let label = config.label
         let maxConcurrentCount = maxConcurrentOperationCount
 
@@ -84,17 +85,16 @@ fileprivate extension GPOperationQueue {
     }
 
     func _runNextOperations() {
-        while (!operationsManager.isEmpty) {
-            self.semaphore.wait()
+        while (!operationsManager.isEmpty && !operationsManager.reachedMaxConcurrentCount) {
+            //self.semaphore.wait()
             operationsManager.dequeueFirstReadyOp { (op, subqueue) in
-                subqueue.remove(op)
                 if let op = op as? TestOperation {
                     print("dequeued op: \(op.jobIndex)")
                 }
                 self.jobQueue.async {
                     if (op.canStart) {
                         op.start()
-                        self.semaphore.signal()
+                        //self.semaphore.signal()
                     }
                 }
             }
