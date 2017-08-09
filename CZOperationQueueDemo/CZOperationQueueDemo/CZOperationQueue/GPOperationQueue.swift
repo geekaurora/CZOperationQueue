@@ -85,13 +85,13 @@ fileprivate extension GPOperationQueue {
     }
 
     func _runNextOperations() {
+        self.semaphore.wait()
         operationsLock.writeLock {(operations) -> Operations? in
             operations.dequeueFirstReadyOp { (op, subqueue) in
                 subqueue.remove(op)
                 if let op = op as? TestOperation {
                     print("dequeued op: \(op.jobIndex)")
                 }
-                self.semaphore.wait()
                 self.jobQueue.async {
                     if (op.canStart) {
                         op.start()
@@ -99,7 +99,7 @@ fileprivate extension GPOperationQueue {
                     }
                 }
             }
-            return nil
+            return operations
         }
     }
 }
