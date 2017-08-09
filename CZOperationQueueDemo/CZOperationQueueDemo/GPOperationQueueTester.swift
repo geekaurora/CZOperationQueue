@@ -38,7 +38,7 @@ class GPOperationQueueTester {
     fileprivate lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "SampleOperationQueue"
-        queue.maxConcurrentOperationCount = 3
+        queue.maxConcurrentOperationCount = 1
         return queue
     }()
     fileprivate var gpOperationQueue: GPOperationQueue?
