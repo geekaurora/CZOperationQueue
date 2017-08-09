@@ -79,11 +79,14 @@ class CZOperationsManager: NSObject {
 
     func cancelAllOperations() {
         subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
+            var canceledCount = 0
             for priority in CZOperationsManager.priorityOrder {
                 guard subOperationQueues[priority] != nil else { continue }
+                canceledCount += subOperationQueues[priority]!.count
                 subOperationQueues[priority]!.forEach{ $0.cancel()}
                 subOperationQueues[priority]!.removeAll()
             }
+            print("\(#function): canceled \(canceledCount) operations.")
             return subOperationQueues
         }
     }

@@ -49,12 +49,17 @@ class GPOperationQueueTester {
 
         gpOperationQueue?.addOperations(operations, waitUntilFinished: true)
 
-        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 3) {[weak self] in
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {[weak self] in
             guard let `self` = self else { return }
-            let operation = TestOperation(11, testDataManager: self.testDataManager)
-            operation.queuePriority = .veryHigh
-            self.gpOperationQueue?.addOperation(operation)
+            self.gpOperationQueue?.cancelAllOperations()
         }
+
+//        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 3) {[weak self] in
+//            guard let `self` = self else { return }
+//            let operation = TestOperation(11, testDataManager: self.testDataManager)
+//            operation.queuePriority = .veryHigh
+//            self.gpOperationQueue?.addOperation(operation)
+//        }
 
         print("TestDataManager: \(testDataManager)")
     }
