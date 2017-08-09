@@ -30,8 +30,8 @@ open class GPOperationQueue: NSObject {
         }
     }    
     
-    override init() {
-        maxConcurrentOperationCount = config.maxConcurrentOperationCount
+    required public init(maxConcurrentOperationCount: Int = config.maxConcurrentOperationCount) {
+         self.maxConcurrentOperationCount = maxConcurrentOperationCount
         operationsManager = CZOperationsManager(maxConcurrentOperationCount: maxConcurrentOperationCount)
         
         let label = config.label
@@ -69,12 +69,10 @@ extension GPOperationQueue: CZOperationsManagerDelegate {
     }
 }
 
-private var kOpObserverContext: Int = 0
 fileprivate extension GPOperationQueue {
     fileprivate struct config {
         static let maxConcurrentOperationCount = 128
         static let label = "com.tony.underlyingQueue"
-        static let kOpFinishedKeyPath = "isFinished"
     }
 
     func _addOperation(_ op: Operation, byAddOperations: Bool = false) {

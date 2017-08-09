@@ -35,17 +35,12 @@ class TestOperation: Operation {
 
 class GPOperationQueueTester {
     fileprivate lazy var testDataManager = TestDataManager.shared
-    fileprivate lazy var operationQueue: OperationQueue = {
-        let queue = OperationQueue()
-        queue.name = "SampleOperationQueue"
-        queue.maxConcurrentOperationCount = 1
-        return queue
-    }()
     fileprivate var gpOperationQueue: GPOperationQueue?
 
     func test() {
         testDataManager.removeAll()
-        gpOperationQueue = GPOperationQueue()
+        gpOperationQueue = GPOperationQueue(maxConcurrentOperationCount: 1)
+
         let operations = (0...10).map {TestOperation($0, testDataManager: testDataManager)}
         operations[0].queuePriority = .veryLow
         operations[1].queuePriority = .low
