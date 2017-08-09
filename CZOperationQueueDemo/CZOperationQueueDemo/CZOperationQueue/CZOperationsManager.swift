@@ -76,6 +76,17 @@ class CZOperationsManager: NSObject {
             return subOperationQueues
         }
     }
+
+    func cancelAllOperations() {
+        subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
+            for priority in CZOperationsManager.priorityOrder {
+                guard subOperationQueues[priority] != nil else { continue }
+                subOperationQueues[priority]!.forEach{ $0.cancel()}
+                subOperationQueues[priority]!.removeAll()
+            }
+            return subOperationQueues
+        }
+    }
 }
 
 private var kOpObserverContext: Int = 0
@@ -95,6 +106,14 @@ extension CZOperationsManager {
             config.kOpFinishedKeyPath == keyPath else {
                 return
         }
+        let isOpInExecutingQueue = self.executingOperationsLock.readLock({ (executingOps) -> Bool? in
+            executingOps.contains(object)
+        }) ?? false
+        if !isOpInExecutingQueue {
+            assertionFailure("Error - attemped to cancel operation isn't in executing queue.")
+            return
+        }
+
         self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
             executingOps.remove(object)
             return executingOps

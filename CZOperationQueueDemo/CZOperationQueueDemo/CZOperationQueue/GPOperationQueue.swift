@@ -15,6 +15,9 @@ open class GPOperationQueue: NSObject {
     }
     fileprivate var operationsManager: CZOperationsManager
     fileprivate let jobQueue: DispatchQueue
+    var operations: [Operation] {
+        return operationsManager.operations
+    }
 
     override init() {
         operationsManager = CZOperationsManager()
@@ -30,6 +33,10 @@ open class GPOperationQueue: NSObject {
     open func addOperations(_ ops: [Operation], waitUntilFinished wait: Bool) {
         ops.forEach { _addOperation($0, byAddOperations: true) }
         _runNextOperations()
+    }
+
+    open func cancelAllOperations() {
+        operationsManager.cancelAllOperations()
     }
 }
 
