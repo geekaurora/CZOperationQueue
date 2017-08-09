@@ -113,8 +113,8 @@
 			children = (
 				E1EE510A1F3AB19F00C1ADB8 /* GPOperationQueue */,
 				E157565C1F3B7C0C00E5338A /* GPOperationQueueTester.swift */,
-				E157566A1F3BA58000E5338A /* NSOperationQueueTester.swift */,
 				E157566C1F3BA59300E5338A /* TestDataManger.swift */,
+				E157566A1F3BA58000E5338A /* NSOperationQueueTester.swift */,
 				E1A535771F3AB1680025F6F1 /* AppDelegate.swift */,
 				E1A535791F3AB1680025F6F1 /* ViewController.swift */,
 				E1A5357B1F3AB1680025F6F1 /* Main.storyboard */,

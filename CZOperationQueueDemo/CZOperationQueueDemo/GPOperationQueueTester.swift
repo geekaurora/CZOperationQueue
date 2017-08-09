@@ -31,6 +31,10 @@ class TestOperation: Operation {
         testDataManager.append(jobIndex)
         print("jobIndex \(jobIndex): finished!")
     }
+
+    override var description: String {
+        return super.description + "; Operation: jobIndex = \(jobIndex); isFinished: \(isFinished)"
+    }
 }
 
 class GPOperationQueueTester {
@@ -46,13 +50,14 @@ class GPOperationQueueTester {
         operations[0].queuePriority = .veryLow
         operations[1].queuePriority = .low
         operations[6].queuePriority = .veryHigh
+        operations[8].addDependency(operations[0])
 
         gpOperationQueue?.addOperations(operations, waitUntilFinished: true)
 
-        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {[weak self] in
-            guard let `self` = self else { return }
-            self.gpOperationQueue?.cancelAllOperations()
-        }
+//        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {[weak self] in
+//            guard let `self` = self else { return }
+//            self.gpOperationQueue?.cancelAllOperations()
+//        }
 
 //        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 3) {[weak self] in
 //            guard let `self` = self else { return }

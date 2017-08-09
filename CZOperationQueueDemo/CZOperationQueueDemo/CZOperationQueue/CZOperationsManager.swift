@@ -40,11 +40,11 @@ class CZOperationsManager: NSObject {
         }) ?? false
     }
 
-    var isEmpty: Bool {
-        return operations.isEmpty
+    var hasReadyOperation: Bool {
+        return operations.contains(where: {$0.canStart})
     }
     var canExecuteNewOperation: Bool {
-        return !isEmpty && !reachedMaxConcurrentCount
+        return hasReadyOperation && !reachedMaxConcurrentCount
     }
 
     func append(_ operation: Operation) {
@@ -56,7 +56,7 @@ class CZOperationsManager: NSObject {
             subOperationQueues[operation.queuePriority]!.append(operation)
             return subOperationQueues
         }
-    } 
+    }
 
     func dequeueFirstReadyOp(dequeueClosure: @escaping DequeueClosure) {
         subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
@@ -109,11 +109,11 @@ extension CZOperationsManager {
             config.kOpFinishedKeyPath == keyPath else {
                 return
         }
-        let isOpInExecutingQueue = self.executingOperationsLock.readLock({ (executingOps) -> Bool? in
+        let isInExecutingQueue = self.executingOperationsLock.readLock({ (executingOps) -> Bool? in
             executingOps.contains(object)
         }) ?? false
-        if !isOpInExecutingQueue {
-            assertionFailure("Error - attemped to cancel operation isn't in executing queue.")
+        if !isInExecutingQueue {
+            assertionFailure("Error - attemped to cancel operation that isn't in executing queue.")
             return
         }
 

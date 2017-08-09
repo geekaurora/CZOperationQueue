@@ -62,13 +62,13 @@ fileprivate extension GPOperationQueue {
     }
 
     func _runNextOperations() {
-        print("\(#function): curr operation count: \(operationsManager.operations.count); canExecuteNewOp: \(operationsManager.canExecuteNewOperation)")
+        print("\(#function): current operation count: \(operationsManager.operations.count); canExecuteNewOp: \(operationsManager.canExecuteNewOperation)")
         
         while (operationsManager.canExecuteNewOperation) {
             operationsManager.dequeueFirstReadyOp { (op, subqueue) in
-//                if let op = op as? TestOperation {
-//                    print("dequeued op: \(op.jobIndex)")
-//                }
+                if let op = op as? TestOperation {
+                    print("dequeued op: \(op.jobIndex)")
+                }
                 self.jobQueue.async {
                     if (op.canStart) {
                         op.start()
@@ -81,6 +81,20 @@ fileprivate extension GPOperationQueue {
 
 extension Operation {
     var canStart: Bool {
-        return !isCancelled && isReady && !isExecuting
+        if (hasUncompleteDependency) {
+            if let op = self as? TestOperation {
+                print("hasUncompleteDependency op: \(op.jobIndex)")
+            }
+        }
+        return !isCancelled &&
+               isReady &&
+               !isExecuting &&
+               !hasUncompleteDependency
+    }
+    var hasUncompleteDependency: Bool {
+        if let op = self as? TestOperation, op.jobIndex == 8 {
+            print("hasUncompleteDependency op: \(op.jobIndex); dependencies: \(op.dependencies)")
+        }
+        return dependencies.contains(where: {!$0.isFinished })
     }
 }
