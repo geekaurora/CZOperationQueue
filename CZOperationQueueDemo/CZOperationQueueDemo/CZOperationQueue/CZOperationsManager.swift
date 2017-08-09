@@ -86,7 +86,7 @@ class CZOperationsManager: NSObject {
                 subOperationQueues[priority]!.forEach{ $0.cancel()}
                 subOperationQueues[priority]!.removeAll()
             }
-            print("\(#function): canceled \(canceledCount) operations.")
+            //print("\(#function): canceled \(canceledCount) operations.")
             return subOperationQueues
         }
     }
