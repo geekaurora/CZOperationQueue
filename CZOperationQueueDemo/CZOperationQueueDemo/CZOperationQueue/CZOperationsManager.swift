@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// Thread-safe operations manager
 class CZOperationsManager: NSObject {
     typealias DequeueClosure = (Operation, inout [Operation]) -> Void
     typealias SubOperationQueues = [Operation.QueuePriority: [Operation]]
@@ -15,6 +16,15 @@ class CZOperationsManager: NSObject {
     fileprivate static let priorityOrder: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
     override init() {
         super.init()
+    }
+    var operations: [Operation] {
+        return subOperationQueuesLock.readLock({ (subOperationQueues) -> [Operation]? in
+            [Operation](CZOperationsManager.priorityOrder.flatMap{ subOperationQueues[$0] }.joined())
+        }) ?? []
+    }
+    
+    var isEmpty: Bool {
+        return operations.isEmpty
     }
 
     func append(_ operation: Operation) {

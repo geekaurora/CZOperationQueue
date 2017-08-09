@@ -16,8 +16,6 @@ extension Operation {
 open class GPOperationQueue: NSObject {
     typealias Operations = CZOperationsManager
     var maxConcurrentOperationCount: Int
-    //var underlyingQueue: CZDispatchQueue
-
     fileprivate lazy var operationsManager = Operations()
     /** CZDispatchQueue */
     /// Serial queue acting as gate keeper, to ensure only one thread is blocked
@@ -82,16 +80,18 @@ fileprivate extension GPOperationQueue {
     }
 
     func _runNextOperations() {
-        self.semaphore.wait()
-        operationsManager.dequeueFirstReadyOp { (op, subqueue) in
-            subqueue.remove(op)
-            if let op = op as? TestOperation {
-                print("dequeued op: \(op.jobIndex)")
-            }
-            self.jobQueue.async {
-                if (op.canStart) {
-                    op.start()
-                    self.semaphore.signal()
+        while (!operationsManager.isEmpty) {
+            self.semaphore.wait()
+            operationsManager.dequeueFirstReadyOp { (op, subqueue) in
+                subqueue.remove(op)
+                if let op = op as? TestOperation {
+                    print("dequeued op: \(op.jobIndex)")
+                }
+                self.jobQueue.async {
+                    if (op.canStart) {
+                        op.start()
+                        self.semaphore.signal()
+                    }
                 }
             }
         }
