@@ -17,13 +17,9 @@ class TestDataManager: CustomStringConvertible {
     init() {}
 
     func append(_ index: Int) {
-//        mutexLock.wait()
-//        output.append(index)
-//        mutexLock.signal()
-
         lock.writeLock {
             $0.append(index)
-            //print("output: \($0)")
+            print("output: \($0)")
         }
     }
     func removeAll() {
