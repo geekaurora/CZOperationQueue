@@ -10,13 +10,12 @@ import UIKit
 
 class TestOperation: Operation {
     fileprivate var testDataManager: TestDataManager
-    fileprivate struct config {
-        static let sleepInterval: TimeInterval = 1
-    }
+    let sleepInterval: TimeInterval
     let jobIndex: Int
 
-    init(_ jobIndex: Int, testDataManager: TestDataManager) {
+    init(_ jobIndex: Int, sleepInterval: TimeInterval = 1, testDataManager: TestDataManager) {
         self.jobIndex = jobIndex
+        self.sleepInterval = sleepInterval
         self.testDataManager = testDataManager
         super.init()
     }
@@ -27,7 +26,7 @@ class TestOperation: Operation {
             return
         }
         print("jobIndex \(jobIndex): started!")
-        Thread.sleep(forTimeInterval: config.sleepInterval)
+        Thread.sleep(forTimeInterval: sleepInterval)
         testDataManager.append(jobIndex)
         print("jobIndex \(jobIndex): finished!")
     }

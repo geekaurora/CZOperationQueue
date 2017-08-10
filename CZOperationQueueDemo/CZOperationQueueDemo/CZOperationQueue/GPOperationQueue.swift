@@ -93,11 +93,6 @@ fileprivate extension GPOperationQueue {
 
 extension Operation {
     var canStart: Bool {
-        if (hasUncompleteDependency) {
-            if let op = self as? TestOperation {
-                print("hasUncompleteDependency op: \(op.jobIndex)")
-            }
-        }
         return !isCancelled &&
                isReady &&
                !isExecuting &&

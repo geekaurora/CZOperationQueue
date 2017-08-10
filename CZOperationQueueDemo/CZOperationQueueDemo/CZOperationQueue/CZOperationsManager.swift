@@ -26,7 +26,6 @@ class CZOperationsManager: NSObject {
             return operations
         }) ?? []
     }
-    deinit { removeObserver(self, forKeyPath: config.kOpFinishedKeyPath) }
 
     override init() {
         super.init()
@@ -91,7 +90,10 @@ class CZOperationsManager: NSObject {
             for priority in CZOperationsManager.priorityOrder {
                 guard subOperationQueues[priority] != nil else { continue }
                 canceledCount += subOperationQueues[priority]!.count
-                subOperationQueues[priority]!.forEach{ $0.cancel()}
+                subOperationQueues[priority]!.forEach{[weak self] in
+                    $0.cancel()
+                    self?.removeFinishedObserver(from: $0)
+                }
                 subOperationQueues[priority]!.removeAll()
             }
             //print("\(#function): canceled \(canceledCount) operations.")
@@ -111,28 +113,33 @@ extension CZOperationsManager {
     open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         guard let newValue = change?[.newKey] as? Bool,
             let oldValue = change?[.oldKey] as? Bool,
-            let object = object as? Operation,
+            let operation = object as? Operation,
             newValue != oldValue,
             context == &kOpObserverContext,
             config.kOpFinishedKeyPath == keyPath else {
                 return
         }
         let isInExecutingQueue = self.executingOperationsLock.readLock({ (executingOps) -> Bool? in
-            executingOps.contains(object)
+            executingOps.contains(operation)
         }) ?? false
+
         if !isInExecutingQueue {
             assertionFailure("Error - attemped to cancel operation that isn't in executing queue.")
             return
         }
 
         self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
-            executingOps.remove(object)
+            executingOps.remove(operation)
             return executingOps
         })
+        removeFinishedObserver(from: operation)
 
         if let delegate = delegate {
-            delegate.operation(object, isFinished: true)
+            delegate.operation(operation, isFinished: true)
         }
+    }
+    func removeFinishedObserver(from operation: Operation) {
+        operation.removeObserver(self, forKeyPath: config.kOpFinishedKeyPath)
     }
 }
 
