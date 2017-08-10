@@ -11,11 +11,16 @@ import UIKit
 class TestDataManager: CustomStringConvertible {
     static let shared = TestDataManager()
     typealias Output = [Int]
+    var output = Output()
     let lock: CZMutexLock<Output> = CZMutexLock(Output())
-
+    let mutexLock = DispatchSemaphore(value: 0)
     init() {}
 
     func append(_ index: Int) {
+//        mutexLock.wait()
+//        output.append(index)
+//        mutexLock.signal()
+
         lock.writeLock {
             $0.append(index)
             //print("output: \($0)")
