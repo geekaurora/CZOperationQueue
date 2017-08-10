@@ -11,40 +11,33 @@ import UIKit
 class TestDataManager: CustomStringConvertible {
     static let shared = TestDataManager()
     typealias Output = [Int]
-    var output: Output
-    let lock: CZMutexLock<Output>
+    let lock: CZMutexLock<Output> = CZMutexLock(Output())
 
-    init() {
-        output = []
-        lock = CZMutexLock(output)
-    }
+    init() {}
 
     func append(_ index: Int) {
-        lock.writeLock { (output) -> Output? in
-            output.append(index)
-            print("output: \(output)")
-            return nil
+        lock.writeLock {
+            $0.append(index)
+            print("output: \($0)")
         }
     }
     func removeAll() {
         lock.writeLock { (output) -> Output? in
             output.removeAll()
-            return nil
+            return output
         }
     }
 
     func index(of obj: Int) -> Int? {
-        guard let output = lock.readLock({ output in
-            return output
-        }) else {
-            return nil
+        return lock.readLock { (output) -> Int? in
+            return output.index(of: obj)
         }
-        return output.index(of: obj)
     }
 
     public var description: String {
-        let output = lock.readLock { $0 } ?? []
-        return "output: \(output)"
+        return lock.readLock { (output) -> String? in
+             return "output: \(output)"
+        } ?? ""
     }
 }
 
@@ -60,7 +53,16 @@ class TestOperation: Operation {
         super.init()
     }
 
+    /// concurrent execution(execute on another thread, instead of on OperationQueue?): override start(), maintain executing, ready manually
+    override func start() {
+        super.start()
+    }
+
     override func main () {
+        _execute()
+    }
+
+    fileprivate func _execute() {
         guard !isCancelled else {
             print("jobIndex \(jobIndex): was cancelled!")
             return
@@ -70,7 +72,6 @@ class TestOperation: Operation {
         testDataManager.append(jobIndex)
         print("jobIndex \(jobIndex): finished!")
     }
-
 //    override var description: String {
 //        return "Operation: jobIndex = \(jobIndex); isFinished: \(isFinished)"
 //    }

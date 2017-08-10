@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        queueTester = GPOperationQueueTester()
-        queueTester?.test()
+//        queueTester = GPOperationQueueTester()
+//        queueTester?.test()
     }
 }

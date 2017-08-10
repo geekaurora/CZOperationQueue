@@ -19,6 +19,13 @@ open class GPOperationQueue: NSObject {
     var operations: [Operation] {
         return operationsManager.operations
     }
+    var operationCount: Int {
+        return operations.count
+    }
+    var isSuspended: Bool {
+        return false
+    }
+    var name: String?
 
     override init() {
         operationsManager = CZOperationsManager()
