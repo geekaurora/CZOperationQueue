@@ -22,9 +22,7 @@ class CZOperationsManager: NSObject {
     var maxConcurrentOperationCount: Int = .max
     weak var delegate: CZOperationsManagerDelegate?
     fileprivate var executingOperations: [Operation] {
-        return executingOperationsLock.readLock({ (operations) -> [Operation]? in
-            return operations
-        }) ?? []
+        return executingOperationsLock.readLock{ $0 } ?? []
     }
 
     override init() {
@@ -38,9 +36,9 @@ class CZOperationsManager: NSObject {
     }
 
     var reachedMaxConcurrentCount: Bool {
-        return executingOperationsLock.readLock({[weak self] (executingOps) -> Bool? in
+        return executingOperationsLock.readLock({[weak self] in
             guard let `self` = self else {return false}
-            return executingOps.count >= self.maxConcurrentOperationCount
+            return $0.count >= self.maxConcurrentOperationCount
         }) ?? false
     }
 
@@ -56,12 +54,11 @@ class CZOperationsManager: NSObject {
 
     func append(_ operation: Operation) {
         operation.addObserver(self, forKeyPath: config.kOpFinishedKeyPath, options: [.new, .old], context: &kOpObserverContext)
-        subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
-            if subOperationQueues[operation.queuePriority] == nil {
-                subOperationQueues[operation.queuePriority] = []
+        subOperationQueuesLock.writeLock {
+            if $0[operation.queuePriority] == nil {
+                $0[operation.queuePriority] = []
             }
-            subOperationQueues[operation.queuePriority]!.append(operation)
-            return subOperationQueues
+            $0[operation.queuePriority]!.append(operation)
         }
     }
 
@@ -119,19 +116,14 @@ extension CZOperationsManager {
             config.kOpFinishedKeyPath == keyPath else {
                 return
         }
-        let isInExecutingQueue = self.executingOperationsLock.readLock({ (executingOps) -> Bool? in
-            executingOps.contains(operation)
-        }) ?? false
+        let isInExecutingQueue = self.executingOperationsLock.readLock{ $0.contains(operation) } ?? false
 
         if !isInExecutingQueue {
             assertionFailure("Error - attemped to cancel operation that isn't in executing queue.")
             return
         }
 
-        self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
-            executingOps.remove(operation)
-            return executingOps
-        })
+        self.executingOperationsLock.writeLock{ $0.remove(operation) }
         removeFinishedObserver(from: operation)
 
         if let delegate = delegate {
