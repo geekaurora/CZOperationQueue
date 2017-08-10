@@ -39,7 +39,6 @@ class CZOperationQueueDemoTests: XCTestCase {
         operations[6].queuePriority = .veryHigh
         // Set dependencies
         operations[8].addDependency(operations[0])
-        // Add operations to CZOperationQueue
         gpOperationQueue?.addOperations(operations, waitUntilFinished: true)
 
         // Test cases
