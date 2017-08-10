@@ -14,7 +14,7 @@ class TestDataManager: CustomStringConvertible {
     var output = Output()
     let lock: CZMutexLock<Output> = CZMutexLock(Output())
     let mutexLock = DispatchSemaphore(value: 0)
-    init() {}
+    init(){}
 
     func append(_ index: Int) {
         lock.writeLock {
@@ -54,13 +54,13 @@ class TestOperation: Operation {
         super.init()
     }
 
-    /// concurrent execution(execute on another thread, instead of on OperationQueue?): override start(), maintain executing, ready manually
-    override func start() {
-        super.start()
-    }
-
     override func main () {
         _execute()
+    }
+
+    // Should cancel execution code if it's concurrent
+    override func cancel() {
+        super.cancel()
     }
 
     fileprivate func _execute() {
