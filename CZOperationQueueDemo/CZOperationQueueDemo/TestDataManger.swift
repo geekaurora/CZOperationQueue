@@ -47,3 +47,32 @@ class TestDataManager: CustomStringConvertible {
         return "output: \(output)"
     }
 }
+
+class TestOperation: Operation {
+    fileprivate var testDataManager: TestDataManager
+    let sleepInterval: TimeInterval
+    let jobIndex: Int
+
+    init(_ jobIndex: Int, sleepInterval: TimeInterval = 1, testDataManager: TestDataManager) {
+        self.jobIndex = jobIndex
+        self.sleepInterval = sleepInterval
+        self.testDataManager = testDataManager
+        super.init()
+    }
+
+    override func main () {
+        guard !isCancelled else {
+            print("jobIndex \(jobIndex): was cancelled!")
+            return
+        }
+        print("jobIndex \(jobIndex): started!")
+        Thread.sleep(forTimeInterval: sleepInterval)
+        testDataManager.append(jobIndex)
+        print("jobIndex \(jobIndex): finished!")
+    }
+
+//    override var description: String {
+//        return "Operation: jobIndex = \(jobIndex); isFinished: \(isFinished)"
+//    }
+}
+
