@@ -25,7 +25,7 @@ open class CZOperationQueue: NSObject {
     return operationsManager.operations
   }
   private enum Constant {
-    static let maxConcurrentOperationCount: Int = .max
+    static let maxConcurrentOperationCount = Int.max
     static let label = "com.CZOperationQueue.underlyingQueue"
   }
 
