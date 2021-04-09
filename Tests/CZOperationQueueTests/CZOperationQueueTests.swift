@@ -22,7 +22,13 @@ final class CZOperationQueueTests: XCTestCase {
     operations[6].queuePriority = .veryHigh
     operations[8].addDependency(operations[0])
     
-    czOperationQueue?.addOperations(operations, waitUntilFinished: false)
+    czOperationQueue?.addOperations(
+      operations,
+      allOperationsFinishedClosure: {
+      // Fulfill the expectatation.
+      expectation.fulfill()
+        
+    })
     
     //        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {[weak self] in
     //            guard let `self` = self else { return }
@@ -38,8 +44,7 @@ final class CZOperationQueueTests: XCTestCase {
     
     dbgPrint("TestDataManager: \(dataManager)")
     
-    // Fulfill the expectatation.
-    // expectation.fulfill()
+
     
     // Wait for expectatation.
     waitForExpectatation()
