@@ -16,7 +16,7 @@ internal protocol CZOperationsManagerDelegate: class {
 /// Thread safe manager that maintains underlying operations, it dequeues the first ready operation from the queue with
 /// ready state / priority / dependencies.
 internal class CZOperationsManager: NSObject {
-  typealias DequeueClosure = (Operation, inout [Operation]) -> Void
+  typealias DequeueOperationClosure = (Operation, inout [Operation]) -> Void
   typealias OperationsMapByPriority = [Operation.QueuePriority: [Operation]]
     
   private enum Constant {
@@ -72,30 +72,37 @@ internal class CZOperationsManager: NSObject {
   
   /// Append `operation` to the queue.
   func append(_ operation: Operation) {
-    operation.addObserver(self, forKeyPath: Constant.kOperationFinishedKeyPath, options: [.new, .old], context: &kOperationObserverContext)
+    operation.addObserver(
+      self,
+      forKeyPath: Constant.kOperationFinishedKeyPath,
+      options: [.new, .old],
+      context: &kOperationObserverContext)
+    
     operationsMapByPriorityLock.writeLock {
       if $0[operation.queuePriority] == nil {
         $0[operation.queuePriority] = []
       }
-      $0[operation.queuePriority]!.append(operation)
+      $0[operation.queuePriority]?.append(operation)
     }
   }
   
   /// Dequeue the first ready Operation if exists.
-  func dequeueFirstReadyOperation(dequeueClosure: @escaping DequeueClosure) {
+  func dequeueFirstReadyOperation(dequeueOperationClosure: @escaping DequeueOperationClosure) {
     operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> OperationsMapByPriority? in
       
       for priority in Self.orderedPriorities {
         guard operationsMapByPriority[priority] != nil else { continue }
         
-        if let operation =  operationsMapByPriority[priority]?.first(where: {$0.canStart}) {
+        if let firstReadyOperation = operationsMapByPriority[priority]?.first(where: {$0.canStart}) {
           
-          operationsMapByPriority[priority]?.remove(operation)
-          self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
-            executingOps.append(operation)
-            return executingOps
+          operationsMapByPriority[priority]?.remove(firstReadyOperation)
+          
+          self.executingOperationsLock.writeLock({ (executingOperations) -> [Operation]? in
+            executingOperations.append(firstReadyOperation)
+            return executingOperations
           })
-          dequeueClosure(operation, &(operationsMapByPriority[priority]!))
+          
+          dequeueOperationClosure(firstReadyOperation, &(operationsMapByPriority[priority]!))
           break
         }
       }
