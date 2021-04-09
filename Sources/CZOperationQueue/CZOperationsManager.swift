@@ -89,19 +89,19 @@ internal class CZOperationsManager: NSObject {
   /// Dequeue the first ready Operation if exists.
   func dequeueFirstReadyOperation(dequeueOperationClosure: @escaping DequeueOperationClosure) {
     operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> OperationsMapByPriority? in
-      
+      // Iterate through operations in the queue with priorities descendingly.
       for priority in Self.orderedPriorities {
         guard operationsMapByPriority[priority] != nil else { continue }
-        
+        // Dequeue the first ready Operation.
         if let firstReadyOperation = operationsMapByPriority[priority]?.first(where: {$0.canStart}) {
-          
+          // Remove it from `operationsMapByPriority` map.
           operationsMapByPriority[priority]?.remove(firstReadyOperation)
-          
+          // Append it to `executingOperations`.
           self.executingOperationsLock.writeLock({ (executingOperations) -> [Operation]? in
             executingOperations.append(firstReadyOperation)
             return executingOperations
           })
-          
+          // Pass `firstReadyOperation` to the external `dequeueOperationClosure`, which will then start the operation.
           dequeueOperationClosure(firstReadyOperation, &(operationsMapByPriority[priority]!))
           break
         }
