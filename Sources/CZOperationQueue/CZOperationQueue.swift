@@ -17,12 +17,14 @@ import CZUtils
 ///  - maxConcurrentOperationCount
 ///
 open class CZOperationQueue: NSObject {
-  private let operationsManager: CZOperationsManager
   private let jobQueue: DispatchQueue
   private let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+  
+  private let operationsManager: CZOperationsManager
   private var operations: [Operation] {
     return operationsManager.operations
   }
+  
   /// The count of operations currently in the queue.
   var operationCount: Int {
     return operations.count
@@ -60,7 +62,7 @@ open class CZOperationQueue: NSObject {
     operations.forEach {
       _addOperation($0, shouldRunNextOperations: false)
     }
-    runNextOperations()
+    runNextReadyOperations()
     
     if waitUntilFinished {
       waitingSemaphore.wait()
@@ -82,7 +84,7 @@ extension CZOperationQueue: CZOperationsManagerDelegate {
       if operationsManager.areAllOperationsFinished {
         notifyOperationsFinished()
       } else {
-        runNextOperations()
+        runNextReadyOperations()
       }
     }
   }
@@ -105,11 +107,11 @@ private extension CZOperationQueue {
     operationsManager.append(operation)
     
     if shouldRunNextOperations {
-      runNextOperations()
+      runNextReadyOperations()
     }
   }
   
-  func runNextOperations() {
+  func runNextReadyOperations() {
     dbgPrint("\(#function): current operation count: \(operationsManager.operations.count); hasNextReadyOperation: \(operationsManager.hasNextReadyOperation)")
     
     while operationsManager.hasNextReadyOperation {

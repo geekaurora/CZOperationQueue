@@ -41,12 +41,13 @@ class CZOperationsManager: NSObject {
   
   /// Delegate that gets notified whenever an operation is finished.
   weak var delegate: CZOperationsManagerDelegate?
+  
   /// All operations that are currently in the queue.
   var operations: [Operation] {
     return subOperationQueuesLock.readLock({ (subOperationQueues) -> [Operation]? in
       [Operation](CZOperationsManager.orderedPriorities.compactMap { subOperationQueues[$0] }.joined())
     }) ?? []
-  }
+  }  
   /// Indicates whether there's the next ready Operation.
   var hasNextReadyOperation: Bool {
     return hasReadyOperation && !hasExceededMaxConcurrentCount
