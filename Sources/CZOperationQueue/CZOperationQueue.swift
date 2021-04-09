@@ -43,8 +43,12 @@ open class CZOperationQueue: NSObject {
   // MARK: - Initializer
   
   public init(maxConcurrentOperationCount: Int = .max) {
-    operationsManager = CZOperationsManager(maxConcurrentOperationCount: maxConcurrentOperationCount)
-    jobQueue = DispatchQueue(label: Constant.label, attributes:  [.concurrent])
+    operationsManager = CZOperationsManager(
+      maxConcurrentOperationCount: maxConcurrentOperationCount
+    )
+    jobQueue = DispatchQueue(
+      label: Constant.label,
+      attributes:  [.concurrent])
     super.init()
     
     operationsManager.delegate = self

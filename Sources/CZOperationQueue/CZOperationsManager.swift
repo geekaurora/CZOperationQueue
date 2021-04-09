@@ -16,13 +16,15 @@ internal protocol CZOperationsManagerDelegate: class {
 /// Thread safe manager that maintains underlying operations, it dequeues the first ready operation from the queue with
 /// ready state / priority / dependencies.
 internal class CZOperationsManager: NSObject {
-  typealias DequeueClosure = (Operation, inout [Operation]) -> Void
+  typealias DequeueOperationClosure = (Operation, inout [Operation]) -> Void
   typealias OperationsMapByPriority = [Operation.QueuePriority: [Operation]]
     
   private enum Constant {
     static let kOperationFinishedKeyPath = "isFinished"
   }
-  private static let orderedPriorities: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
+  private static let orderedPriorities: [Operation.QueuePriority] = [
+    .veryHigh, .high, .normal, .low, .veryLow
+  ]
   private lazy var operationsMapByPriorityLock = CZMutexLock(OperationsMapByPriority())
   private lazy var executingOperationsLock = CZMutexLock([Operation]())
   
@@ -36,16 +38,18 @@ internal class CZOperationsManager: NSObject {
     }) ?? false
   }
   private var hasReadyOperation: Bool {
-    return operations.contains(where: {$0.canStart})
+    return operations.contains { $0.canStart }
   }
   
   /// Delegate that gets notified whenever an operation is finished.
   weak var delegate: CZOperationsManagerDelegate?
   
-  /// All operations that are currently in the queue.
+  /// All operations that are currently in the queue - ordered by priority descendingly.
   var operations: [Operation] {
     return operationsMapByPriorityLock.readLock({ (operationsMapByPriority) -> [Operation]? in
-      [Operation](CZOperationsManager.orderedPriorities.compactMap { operationsMapByPriority[$0] }.joined())
+      [Operation](CZOperationsManager.orderedPriorities.compactMap {
+        operationsMapByPriority[$0]
+      }.joined())
     }) ?? []
   }  
   /// Indicates whether there's the next ready Operation.
@@ -68,30 +72,37 @@ internal class CZOperationsManager: NSObject {
   
   /// Append `operation` to the queue.
   func append(_ operation: Operation) {
-    operation.addObserver(self, forKeyPath: Constant.kOperationFinishedKeyPath, options: [.new, .old], context: &kOperationObserverContext)
+    operation.addObserver(
+      self,
+      forKeyPath: Constant.kOperationFinishedKeyPath,
+      options: [.new, .old],
+      context: &kOperationObserverContext)
+    
     operationsMapByPriorityLock.writeLock {
       if $0[operation.queuePriority] == nil {
         $0[operation.queuePriority] = []
       }
-      $0[operation.queuePriority]!.append(operation)
+      $0[operation.queuePriority]?.append(operation)
     }
   }
   
   /// Dequeue the first ready Operation if exists.
-  func dequeueFirstReadyOperation(dequeueClosure: @escaping DequeueClosure) {
+  func dequeueFirstReadyOperation(dequeueOperationClosure: @escaping DequeueOperationClosure) {
     operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> OperationsMapByPriority? in
-      
+      // Iterate through operations in the queue with priorities descendingly.
       for priority in Self.orderedPriorities {
         guard operationsMapByPriority[priority] != nil else { continue }
-        
-        if let operation =  operationsMapByPriority[priority]?.first(where: {$0.canStart}) {
-          
-          operationsMapByPriority[priority]?.remove(operation)
-          self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
-            executingOps.append(operation)
-            return executingOps
+        // Dequeue the first ready Operation.
+        if let firstReadyOperation = operationsMapByPriority[priority]?.first(where: {$0.canStart}) {
+          // Remove it from `operationsMapByPriority` map.
+          operationsMapByPriority[priority]?.remove(firstReadyOperation)
+          // Append it to `executingOperations`.
+          self.executingOperationsLock.writeLock({ (executingOperations) -> [Operation]? in
+            executingOperations.append(firstReadyOperation)
+            return executingOperations
           })
-          dequeueClosure(operation, &(operationsMapByPriority[priority]!))
+          // Pass `firstReadyOperation` to the external `dequeueOperationClosure`, which will then start the operation.
+          dequeueOperationClosure(firstReadyOperation, &(operationsMapByPriority[priority]!))
           break
         }
       }
@@ -103,14 +114,16 @@ internal class CZOperationsManager: NSObject {
   func cancelAllOperations() {
     operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> OperationsMapByPriority? in
       var canceledCount = 0
-      for priority in CZOperationsManager.orderedPriorities {
-        guard operationsMapByPriority[priority] != nil else { continue }
+      for priority in Self.orderedPriorities {
+        guard operationsMapByPriority[priority] != nil else {
+          continue
+        }
         canceledCount += operationsMapByPriority[priority]!.count
-        operationsMapByPriority[priority]!.forEach{[weak self] in
+        operationsMapByPriority[priority]?.forEach{ [weak self] in
           $0.cancel()
           self?.removeFinishedObserver(from: $0)
         }
-        operationsMapByPriority[priority]!.removeAll()
+        operationsMapByPriority[priority]?.removeAll()
       }
       
       dbgPrint("\(#function): canceled \(canceledCount) operations.")
@@ -135,16 +148,17 @@ extension CZOperationsManager {
           Constant.kOperationFinishedKeyPath == keyPath else {
       return
     }
-    let isInExecutingQueue = self.executingOperationsLock.readLock{ $0.contains(operation) } ?? false
-    
-    if !isInExecutingQueue {
+    // Verify that `operation` state isn't executing.
+    let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
+    if !isOperationExecuting {
       assertionFailure("Error - attemped to cancel operation that isn't in executing queue.")
       return
     }
-    
+    // Remove `operation` from `executingOperations`.
     self.executingOperationsLock.writeLock{ $0.remove(operation) }
+    // Remove self from KVO observers of `operation`.
     removeFinishedObserver(from: operation)
-    
+    // Notify delegate that`operation` is finished.
     //delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
     delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
   }
