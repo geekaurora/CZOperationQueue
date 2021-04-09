@@ -6,8 +6,13 @@ import CZTestUtils
 final class CZOperationQueueTests: XCTestCase {
   private lazy var dataManager = TestDataManager.shared
   private var czOperationQueue: CZOperationQueue?
+  private enum Constant {
+    static let timeOut: TimeInterval = 30
+  }
   
   func testAddOperation() {
+    let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
+    
     dataManager.removeAll()
     czOperationQueue = CZOperationQueue(maxConcurrentOperationCount: 3)
     
@@ -31,6 +36,12 @@ final class CZOperationQueueTests: XCTestCase {
     //            self.czOperationQueue?.addOperation(operation)
     //        }
     
-    print("TestDataManager: \(dataManager)")
+    dbgPrint("TestDataManager: \(dataManager)")
+    
+    // Fulfill the expectatation.
+    expectation.fulfill()
+    
+    // Wait for expectatation.
+    waitForExpectatation()
   }
 }
