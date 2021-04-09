@@ -95,7 +95,7 @@ private extension CZOperationQueue {
   }
   
   func runNextOperations() {
-    dbgPrint("\(#function): current operation count: \(operationsManager.operations.count); canExecuteNewOp: \(operationsManager.hasNextReadyOperation)")
+    dbgPrint("\(#function): current operation count: \(operationsManager.operations.count); hasNextReadyOperation: \(operationsManager.hasNextReadyOperation)")
     
     while operationsManager.hasNextReadyOperation {
       operationsManager.dequeueFirstReadyOperation { (operation, subqueue) in
@@ -116,12 +116,10 @@ extension Operation {
     return !isCancelled &&
       isReady &&
       !isExecuting &&
-      !hasUncompleteDependency
+      !hasUnfinishedDependency
   }
-  var hasUncompleteDependency: Bool {
-    //if let operation = self as? TestOperation, operation.jobIndex == 8 {
-    dbgPrint("hasUncompleteDependency operation: \(self); dependencies: \(dependencies)")
-    //}
+  var hasUnfinishedDependency: Bool {
+    dbgPrint("hasUnfinishedDependency operation: \(self); dependencies: \(dependencies)")
     return dependencies.contains(where: {!$0.isFinished })
   }
 }
