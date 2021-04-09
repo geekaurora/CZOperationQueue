@@ -16,6 +16,22 @@ final class CZOperationQueueTests: XCTestCase {
     czOperationQueue = CZOperationQueue(maxConcurrentOperationCount: Constant.maxConcurrentOperationCount)
   }
   
+  func testAddOperation() {
+    let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
+    // Add one operation.
+    let operation = TestOperation(0, dataManager: dataManager)
+    czOperationQueue.addOperations(
+      [operation],
+      allOperationsFinished: {
+        // Verify `operation` has been executed.
+        XCTAssertTrue(operation.isExecuted, "operation should have been executed.")
+        // Fulfill the expectatation.
+        expectation.fulfill()
+      })
+    // Wait for expectatation.
+    waitForExpectatation()
+  }
+  
   func testAddOperationWithDependency() {
     let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
     
@@ -28,10 +44,10 @@ final class CZOperationQueueTests: XCTestCase {
     czOperationQueue.addOperations(
       operations,
       allOperationsFinished: {
-      // Fulfill the expectatation.
-      expectation.fulfill()
+        // Fulfill the expectatation.
+        expectation.fulfill()
         
-    })
+      })
     
     //        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {[weak self] in
     //            guard let `self` = self else { return }
