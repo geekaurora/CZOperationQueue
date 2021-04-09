@@ -159,7 +159,6 @@ extension CZOperationsManager {
     // Remove self from KVO observers of `operation`.
     removeFinishedObserver(from: operation)
     // Notify delegate that`operation` is finished.
-    //delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
     delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
   }
   
