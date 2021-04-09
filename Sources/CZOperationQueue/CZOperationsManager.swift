@@ -16,12 +16,12 @@ protocol CZOperationsManagerDelegate: class {
 class CZOperationsManager: NSObject {
     typealias DequeueClosure = (Operation, inout [Operation]) -> Void
     typealias SubOperationQueues = [Operation.QueuePriority: [Operation]]
-    fileprivate lazy var subOperationQueuesLock: CZMutexLock<SubOperationQueues> = CZMutexLock(SubOperationQueues())
-    fileprivate lazy var executingOperationsLock: CZMutexLock<[Operation]> = CZMutexLock([Operation]())
-    fileprivate static let priorityOrder: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
+    private lazy var subOperationQueuesLock: CZMutexLock<SubOperationQueues> = CZMutexLock(SubOperationQueues())
+    private lazy var executingOperationsLock: CZMutexLock<[Operation]> = CZMutexLock([Operation]())
+    private static let priorityOrder: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
     var maxConcurrentOperationCount: Int = .max
     weak var delegate: CZOperationsManagerDelegate?
-    fileprivate var executingOperations: [Operation] {
+    private var executingOperations: [Operation] {
         return executingOperationsLock.readLock{ $0 } ?? []
     }
 
@@ -100,8 +100,8 @@ class CZOperationsManager: NSObject {
 }
 
 private var kOpObserverContext: Int = 0
-fileprivate extension CZOperationsManager {
-    fileprivate struct config {
+private extension CZOperationsManager {
+    private struct config {
         static let kOpFinishedKeyPath = "isFinished"
     }
 }

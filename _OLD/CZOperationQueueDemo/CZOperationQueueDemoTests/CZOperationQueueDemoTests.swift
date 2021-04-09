@@ -10,8 +10,8 @@ import XCTest
 @testable import CZOperationQueueDemo
 
 class CZOperationQueueDemoTests: XCTestCase {
-    fileprivate var testDataManager: TestDataManager!
-    fileprivate var gpOperationQueue: GPOperationQueue?
+    private var testDataManager: TestDataManager!
+    private var gpOperationQueue: GPOperationQueue?
 
     override func setUp() {
         super.setUp()

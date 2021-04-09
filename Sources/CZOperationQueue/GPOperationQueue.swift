@@ -13,9 +13,9 @@ open class GPOperationQueue: NSObject {
             operationsManager.maxConcurrentOperationCount = maxConcurrentOperationCount
         }
     }
-    fileprivate var operationsManager: CZOperationsManager
-    fileprivate let jobQueue: DispatchQueue
-    fileprivate let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+    private var operationsManager: CZOperationsManager
+    private let jobQueue: DispatchQueue
+    private let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
     var operations: [Operation] {
         return operationsManager.operations
     }
@@ -63,8 +63,8 @@ extension GPOperationQueue: CZOperationsManagerDelegate {
     }
 }
 
-fileprivate extension GPOperationQueue {
-    fileprivate struct config {
+private extension GPOperationQueue {
+    private struct config {
         static let maxConcurrentOperationCount: Int = .max
         static let label = "com.tony.underlyingQueue"
     }

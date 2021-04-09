@@ -9,14 +9,14 @@
 import UIKit
 
 class NSOperationQueueTester {
-    fileprivate lazy var testDataManager = TestDataManager.shared
-    fileprivate lazy var operationQueue: OperationQueue = {
+    private lazy var testDataManager = TestDataManager.shared
+    private lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "SampleOperationQueue"
         queue.maxConcurrentOperationCount = 3
         return queue
     }()
-    fileprivate var gpOperationQueue: GPOperationQueue?
+    private var gpOperationQueue: GPOperationQueue?
 
     func test() {
         testDataManager.removeAll()

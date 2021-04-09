@@ -9,8 +9,8 @@
 import UIKit
 
 class GPOperationQueueTester {
-    fileprivate lazy var testDataManager = TestDataManager.shared
-    fileprivate var gpOperationQueue: GPOperationQueue?
+    private lazy var testDataManager = TestDataManager.shared
+    private var gpOperationQueue: GPOperationQueue?
 
     func test() {
         testDataManager.removeAll()

@@ -43,7 +43,7 @@ class TestDataManager: CustomStringConvertible {
 }
 
 class TestOperation: Operation {
-    fileprivate var testDataManager: TestDataManager
+    private var testDataManager: TestDataManager
     let sleepInterval: TimeInterval
     let jobIndex: Int
 
@@ -63,7 +63,7 @@ class TestOperation: Operation {
         super.cancel()
     }
 
-    fileprivate func _execute() {
+    private func _execute() {
         guard !isCancelled else {
             print("jobIndex \(jobIndex): was cancelled!")
             return
