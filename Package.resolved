@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "CZTestUtils",
+        "repositoryURL": "https://github.com/geekaurora/CZTestUtils.git",
+        "state": {
+          "branch": null,
+          "revision": "fee1c04183de55cf07ce699e25bc6d27e308f49b",
+          "version": "1.1.2"
+        }
+      },
+      {
         "package": "CZUtils",
         "repositoryURL": "https://github.com/geekaurora/CZUtils.git",
         "state": {
