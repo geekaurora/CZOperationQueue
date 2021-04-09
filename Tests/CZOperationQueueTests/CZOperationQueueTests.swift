@@ -9,6 +9,9 @@ final class CZOperationQueueTests: XCTestCase {
     static let timeOut: TimeInterval = 30
     static let maxConcurrentOperationCount = 3
   }
+  private enum MockData {
+    static let testIndexesArray = Array(0...10)
+  }
   private let dataManager = TestDataManager.shared
   private var czOperationQueue: CZOperationQueue!
 
@@ -38,17 +41,22 @@ final class CZOperationQueueTests: XCTestCase {
   func testAddOperations() {
     let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
     // Add operations.
-    let operations = (0...10).map { TestOperation($0, dataManager: dataManager) }
+    let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
     czOperationQueue.addOperations(
       operations,
       allOperationsFinished: {
         dbgPrint("TestDataManager: \(self.dataManager)")
+        
         // Verify `operations` have been executed.
         XCTAssertTrue(!operations.contains { !$0.isExecuted }, "All operations should have been executed.")
-        
+       
+        // Verify results of dataManager are correct.
+        let expected = Set(MockData.testIndexesArray)
+        let actual = Set(self.dataManager.results())
+        XCTAssertEqual(expected, actual, "Results are incorrect! expected = \(expected), \nactual=\(actual)")
+       
         // Fulfill the expectatation.
         expectation.fulfill()
-        
       })
     // Wait for expectatation.
     waitForExpectatation()

@@ -15,9 +15,8 @@ public class TestDataManager: CustomStringConvertible {
   }
   
   public func results() -> [Int] {
-    resultsLock.writeLock { (results) -> [Int]? in
-      results.removeAll()
-      return results
+    resultsLock.readLock { (results) -> [Int]? in
+      results
     } ?? []
   }
   
