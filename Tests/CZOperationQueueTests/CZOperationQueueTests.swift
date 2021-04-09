@@ -40,6 +40,7 @@ final class CZOperationQueueTests: XCTestCase {
   
   func testAddOperations() {
     let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
+    
     // Add operations.
     let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
     czOperationQueue.addOperations(
@@ -62,10 +63,77 @@ final class CZOperationQueueTests: XCTestCase {
     waitForExpectatation()
   }
   
+  func testAddOperationsWithPriority() {
+    let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
+    
+    // Init operations with priority.
+    let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
+    operations[0].queuePriority = .veryLow
+    operations[1].queuePriority = .low
+    operations[8].queuePriority = .high
+    operations[6].queuePriority = .veryHigh
+
+    // Add operations.
+    czOperationQueue.addOperations(
+      operations,
+      allOperationsFinished: {
+        dbgPrint("TestDataManager: \(self.dataManager)")
+        
+        // Verify `operations` have been executed.
+        XCTAssertTrue(!operations.contains { !$0.isExecuted }, "All operations should have been executed.")
+       
+        // Verify results of dataManager are correct.
+        let expected = Set(MockData.testIndexesArray)
+        let actual = Set(self.dataManager.results())
+        XCTAssertEqual(expected, actual, "Results are incorrect! expected = \(expected), \nactual=\(actual)")
+       
+        // Verify `operations` execution order - should correspond to priorities.
+        // operations[0].queuePriority = .veryLow
+        let resultIndexOfOperation0 = self.dataManager.index(of: 0)!
+        // operations[1].queuePriority = .low
+        let resultIndexOfOperation1 = self.dataManager.index(of: 1)!
+        
+        // operations[7].queuePriority = .normal
+        // Note: Should choose operation with later index for .normal priority,
+        // because if operation already executes, it will ignore priority.
+        let resultIndexOfOperation7 = self.dataManager.index(of: 7)!
+        
+        // operations[8].queuePriority = .high
+        let resultIndexOfOperation8 = self.dataManager.index(of: 8)!
+        // operations[6].queuePriority = .veryHigh
+        let resultIndexOfOperation6 = self.dataManager.index(of: 6)!
+
+        // Verify priority: .veryLow < .low
+        XCTAssertTrue(
+          resultIndexOfOperation1 < resultIndexOfOperation0,
+          "Incorrect executing order of priority! resultIndexOfOperation0 = \(resultIndexOfOperation0), \nresultIndexOfOperation1=\(resultIndexOfOperation1)")
+
+        // Verify priority: .low < .normal
+        XCTAssertTrue(
+          resultIndexOfOperation7 < resultIndexOfOperation1,
+          "Incorrect executing order of priority! resultIndexOfOperation1 = \(resultIndexOfOperation1), \nresultIndexOfOperation7=\(resultIndexOfOperation7)")
+
+        // Verify priority: .normal < .high
+        XCTAssertTrue(
+          resultIndexOfOperation8 < resultIndexOfOperation7,
+          "Incorrect executing order of priority! resultIndexOfOperation7 = \(resultIndexOfOperation7), \nresultIndexOfOperation8=\(resultIndexOfOperation8)")
+
+        // Verify priority: .high < .veryHigh
+        XCTAssertTrue(
+          resultIndexOfOperation6 < resultIndexOfOperation8,
+          "Incorrect executing order of priority! resultIndexOfOperation7 = \(resultIndexOfOperation7), \nresultIndexOfOperation8=\(resultIndexOfOperation8)")
+        
+        // Fulfill the expectatation.
+        expectation.fulfill()
+      })
+    // Wait for expectatation.
+    waitForExpectatation()
+  }
+  
   func testAddOperationWithDependency() {
     let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
     
-    let operations = (0...10).map { TestOperation($0, dataManager: dataManager) }
+    let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
     operations[0].queuePriority = .veryLow
     operations[1].queuePriority = .low
     operations[6].queuePriority = .veryHigh
