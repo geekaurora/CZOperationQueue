@@ -104,14 +104,6 @@ extension CZOperationQueue: CZOperationsManagerDelegate {
     } else {
       runNextReadyOperations()
     }
-    
-//    if areAllOperationsFinished {
-//      if operationsManager.areAllOperationsFinished {
-//        notifyOperationsFinished()
-//      } else {
-//        runNextReadyOperations()
-//      }
-//    }
   }
 }
 
