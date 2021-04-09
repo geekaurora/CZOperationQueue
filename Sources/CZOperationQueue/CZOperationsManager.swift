@@ -145,7 +145,8 @@ extension CZOperationsManager {
     self.executingOperationsLock.writeLock{ $0.remove(operation) }
     removeFinishedObserver(from: operation)
     
-    delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
+    //delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
+    delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
   }
   
   func removeFinishedObserver(from operation: Operation) {
