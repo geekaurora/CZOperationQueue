@@ -1,11 +1,11 @@
-import XCTest
-@testable import CZOperationQueue
+import UIKit
+import CZOperationQueue
 
-final class CZOperationQueueTests: XCTestCase {
+class CZOperationQueueTester {
   private lazy var testDataManager = TestDataManager.shared
   private var czOperationQueue: CZOperationQueue?
   
-  func testAddOperation() {
+  func test() {
     testDataManager.removeAll()
     czOperationQueue = CZOperationQueue(maxConcurrentOperationCount: 3)
     
@@ -31,4 +31,7 @@ final class CZOperationQueueTests: XCTestCase {
     
     print("TestDataManager: \(testDataManager)")
   }
+  
 }
+
+
