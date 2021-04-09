@@ -132,9 +132,7 @@ extension CZOperationsManager {
     self.executingOperationsLock.writeLock{ $0.remove(operation) }
     removeFinishedObserver(from: operation)
     
-    if let delegate = delegate {
-      delegate.operationDidFinish(operation, isAllOperationsFinished: true)
-    }
+    delegate?.operationDidFinish(operation, isAllOperationsFinished: true)
   }
   func removeFinishedObserver(from operation: Operation) {
     operation.removeObserver(self, forKeyPath: config.kOpFinishedKeyPath)
