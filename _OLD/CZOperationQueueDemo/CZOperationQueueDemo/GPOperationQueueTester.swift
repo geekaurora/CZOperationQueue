@@ -1,5 +1,5 @@
 //
-//  GPOperationQueueTester.swift
+//  CZOperationQueueTester.swift
 //  TestNSOperationQueue
 //
 //  Created by Cheng Zhang on 7/11/17.
@@ -8,13 +8,13 @@
 
 import UIKit
 
-class GPOperationQueueTester {
+class CZOperationQueueTester {
     private lazy var testDataManager = TestDataManager.shared
-    private var gpOperationQueue: GPOperationQueue?
+    private var gpOperationQueue: CZOperationQueue?
 
     func test() {
         testDataManager.removeAll()
-        gpOperationQueue = GPOperationQueue()
+        gpOperationQueue = CZOperationQueue()
         gpOperationQueue?.maxConcurrentOperationCount = 3
         
         let operations = (0...10).map {TestOperation($0, testDataManager: testDataManager)}

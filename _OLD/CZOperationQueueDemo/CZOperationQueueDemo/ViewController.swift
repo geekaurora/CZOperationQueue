@@ -9,12 +9,12 @@
 import UIKit
 
 class ViewController: UIViewController {
-    var queueTester: GPOperationQueueTester?
+    var queueTester: CZOperationQueueTester?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-//        queueTester = GPOperationQueueTester()
+//        queueTester = CZOperationQueueTester()
 //        queueTester?.test()
     }
 }

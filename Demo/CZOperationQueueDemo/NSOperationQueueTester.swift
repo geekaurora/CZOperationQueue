@@ -14,7 +14,7 @@ class NSOperationQueueTester {
         queue.maxConcurrentOperationCount = 3
         return queue
     }()
-    private var gpOperationQueue: GPOperationQueue?
+    private var gpOperationQueue: CZOperationQueue?
 
     func test() {
         testDataManager.removeAll()

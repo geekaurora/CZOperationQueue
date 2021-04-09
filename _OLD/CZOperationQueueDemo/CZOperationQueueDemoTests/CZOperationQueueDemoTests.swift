@@ -11,7 +11,7 @@ import XCTest
 
 class CZOperationQueueDemoTests: XCTestCase {
     private var testDataManager: TestDataManager!
-    private var gpOperationQueue: GPOperationQueue?
+    private var gpOperationQueue: CZOperationQueue?
 
     override func setUp() {
         super.setUp()
@@ -28,7 +28,7 @@ class CZOperationQueueDemoTests: XCTestCase {
     /// Test priority, dependency
     func testBasic() {
         testDataManager = TestDataManager()
-        gpOperationQueue = GPOperationQueue()
+        gpOperationQueue = CZOperationQueue()
         gpOperationQueue?.maxConcurrentOperationCount = 3
 
         let sleepInterval: TimeInterval = 0.01

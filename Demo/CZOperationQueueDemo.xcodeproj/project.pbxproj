@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		C3D3C2112620394100717883 /* CZOperationQueue in Frameworks */ = {isa = PBXBuildFile; productRef = C3D3C2102620394100717883 /* CZOperationQueue */; };
 		C3D3C2132620394100717883 /* CZOperationQueue in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C3D3C2102620394100717883 /* CZOperationQueue */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		C3D3C2162620396400717883 /* GPOperationQueueTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D3C2142620396400717883 /* GPOperationQueueTester.swift */; };
+		C3D3C2162620396400717883 /* CZOperationQueueTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D3C2142620396400717883 /* CZOperationQueueTester.swift */; };
 		C3D3C2172620396400717883 /* NSOperationQueueTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D3C2152620396400717883 /* NSOperationQueueTester.swift */; };
 		C3E8381A262038EE00432E18 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E83819262038EE00432E18 /* AppDelegate.swift */; };
 		C3E8381C262038EE00432E18 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E8381B262038EE00432E18 /* SceneDelegate.swift */; };
@@ -35,7 +35,7 @@
 
 /* Begin PBXFileReference section */
 		C3D3C20A2620393500717883 /* CZOperationQueue */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CZOperationQueue; path = ..; sourceTree = "<group>"; };
-		C3D3C2142620396400717883 /* GPOperationQueueTester.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPOperationQueueTester.swift; sourceTree = "<group>"; };
+		C3D3C2142620396400717883 /* CZOperationQueueTester.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CZOperationQueueTester.swift; sourceTree = "<group>"; };
 		C3D3C2152620396400717883 /* NSOperationQueueTester.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSOperationQueueTester.swift; sourceTree = "<group>"; };
 		C3E83816262038EE00432E18 /* CZOperationQueueDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CZOperationQueueDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3E83819262038EE00432E18 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -100,7 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				C3E8381D262038EE00432E18 /* ViewController.swift */,
-				C3D3C2142620396400717883 /* GPOperationQueueTester.swift */,
+				C3D3C2142620396400717883 /* CZOperationQueueTester.swift */,
 				C3D3C2152620396400717883 /* NSOperationQueueTester.swift */,
 				C3E83827262038EE00432E18 /* Info.plist */,
 				C3D3C2072620390700717883 /* Supported Files */,
@@ -186,7 +186,7 @@
 				C3E8381E262038EE00432E18 /* ViewController.swift in Sources */,
 				C3E8381A262038EE00432E18 /* AppDelegate.swift in Sources */,
 				C3E8381C262038EE00432E18 /* SceneDelegate.swift in Sources */,
-				C3D3C2162620396400717883 /* GPOperationQueueTester.swift in Sources */,
+				C3D3C2162620396400717883 /* CZOperationQueueTester.swift in Sources */,
 				C3D3C2172620396400717883 /* NSOperationQueueTester.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

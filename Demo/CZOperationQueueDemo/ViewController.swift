@@ -4,11 +4,11 @@ class ViewController: UIViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    testGPOperationQueue()
+    testCZOperationQueue()
   }
   
-  func testGPOperationQueue() {
-    GPOperationQueueTester().test()
+  func testCZOperationQueue() {
+    CZOperationQueueTester().test()
   }
 }
 

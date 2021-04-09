@@ -1,5 +1,5 @@
 //
-//  GPOperationQueue.swift
+//  CZOperationQueue.swift
 //
 //  Created by Cheng Zhang on 7/10/17.
 //  Copyright © 2017 Cheng Zhang. All rights reserved.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class GPOperationQueue: NSObject {
+open class CZOperationQueue: NSObject {
     public var maxConcurrentOperationCount: Int = .max {
         didSet {
             operationsManager.maxConcurrentOperationCount = maxConcurrentOperationCount
@@ -51,7 +51,7 @@ open class GPOperationQueue: NSObject {
     }
 }
 
-extension GPOperationQueue: CZOperationsManagerDelegate {
+extension CZOperationQueue: CZOperationsManagerDelegate {
     func operation(_ op: Operation, isFinished: Bool) {
         if isFinished {
             if operationsManager.allOperationsFinished {
@@ -63,7 +63,7 @@ extension GPOperationQueue: CZOperationsManagerDelegate {
     }
 }
 
-private extension GPOperationQueue {
+private extension CZOperationQueue {
     private struct config {
         static let maxConcurrentOperationCount: Int = .max
         static let label = "com.tony.underlyingQueue"
