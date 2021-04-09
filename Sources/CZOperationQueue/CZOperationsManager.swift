@@ -17,13 +17,13 @@ internal protocol CZOperationsManagerDelegate: class {
 /// ready state / priority / dependencies.
 internal class CZOperationsManager: NSObject {
   typealias DequeueClosure = (Operation, inout [Operation]) -> Void
-  typealias SubOperationQueues = [Operation.QueuePriority: [Operation]]
-  
+  typealias OperationsMapByPriority = [Operation.QueuePriority: [Operation]]
+    
   private enum Constant {
     static let kOperationFinishedKeyPath = "isFinished"
   }
   private static let orderedPriorities: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
-  private lazy var subOperationQueuesLock = CZMutexLock(SubOperationQueues())
+  private lazy var operationsMapByPriorityLock = CZMutexLock(OperationsMapByPriority())
   private lazy var executingOperationsLock = CZMutexLock([Operation]())
   
   private var executingOperations: [Operation] {
@@ -44,8 +44,8 @@ internal class CZOperationsManager: NSObject {
   
   /// All operations that are currently in the queue.
   var operations: [Operation] {
-    return subOperationQueuesLock.readLock({ (subOperationQueues) -> [Operation]? in
-      [Operation](CZOperationsManager.orderedPriorities.compactMap { subOperationQueues[$0] }.joined())
+    return operationsMapByPriorityLock.readLock({ (operationsMapByPriority) -> [Operation]? in
+      [Operation](CZOperationsManager.orderedPriorities.compactMap { operationsMapByPriority[$0] }.joined())
     }) ?? []
   }  
   /// Indicates whether there's the next ready Operation.
@@ -69,7 +69,7 @@ internal class CZOperationsManager: NSObject {
   /// Append `operation` to the queue.
   func append(_ operation: Operation) {
     operation.addObserver(self, forKeyPath: Constant.kOperationFinishedKeyPath, options: [.new, .old], context: &kOperationObserverContext)
-    subOperationQueuesLock.writeLock {
+    operationsMapByPriorityLock.writeLock {
       if $0[operation.queuePriority] == nil {
         $0[operation.queuePriority] = []
       }
@@ -79,42 +79,42 @@ internal class CZOperationsManager: NSObject {
   
   /// Dequeue the first ready Operation if exists.
   func dequeueFirstReadyOperation(dequeueClosure: @escaping DequeueClosure) {
-    subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
+    operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> OperationsMapByPriority? in
       
       for priority in Self.orderedPriorities {
-        guard subOperationQueues[priority] != nil else { continue }
+        guard operationsMapByPriority[priority] != nil else { continue }
         
-        if let operation =  subOperationQueues[priority]?.first(where: {$0.canStart}) {
+        if let operation =  operationsMapByPriority[priority]?.first(where: {$0.canStart}) {
           
-          subOperationQueues[priority]?.remove(operation)
+          operationsMapByPriority[priority]?.remove(operation)
           self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
             executingOps.append(operation)
             return executingOps
           })
-          dequeueClosure(operation, &(subOperationQueues[priority]!))
+          dequeueClosure(operation, &(operationsMapByPriority[priority]!))
           break
         }
       }
-      return subOperationQueues
+      return operationsMapByPriority
     }
   }
   
   /// Cancel all operations from the queue.
   func cancelAllOperations() {
-    subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
+    operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> OperationsMapByPriority? in
       var canceledCount = 0
       for priority in CZOperationsManager.orderedPriorities {
-        guard subOperationQueues[priority] != nil else { continue }
-        canceledCount += subOperationQueues[priority]!.count
-        subOperationQueues[priority]!.forEach{[weak self] in
+        guard operationsMapByPriority[priority] != nil else { continue }
+        canceledCount += operationsMapByPriority[priority]!.count
+        operationsMapByPriority[priority]!.forEach{[weak self] in
           $0.cancel()
           self?.removeFinishedObserver(from: $0)
         }
-        subOperationQueues[priority]!.removeAll()
+        operationsMapByPriority[priority]!.removeAll()
       }
       
       dbgPrint("\(#function): canceled \(canceledCount) operations.")
-      return subOperationQueues
+      return operationsMapByPriority
     }
   }
 }
@@ -145,7 +145,8 @@ extension CZOperationsManager {
     self.executingOperationsLock.writeLock{ $0.remove(operation) }
     removeFinishedObserver(from: operation)
     
-    delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
+    //delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
+    delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
   }
   
   func removeFinishedObserver(from operation: Operation) {

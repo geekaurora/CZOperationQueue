@@ -24,7 +24,11 @@ open class CZOperationQueue: NSObject {
   private var operations: [Operation] {
     return operationsManager.operations
   }
-  
+  private enum Constant {
+    static let maxConcurrentOperationCount = Int.max
+    static let label = "com.CZOperationQueue.underlyingQueue"
+  }
+
   /// The count of operations currently in the queue.
   var operationCount: Int {
     return operations.count
@@ -40,7 +44,7 @@ open class CZOperationQueue: NSObject {
   
   public init(maxConcurrentOperationCount: Int = .max) {
     operationsManager = CZOperationsManager(maxConcurrentOperationCount: maxConcurrentOperationCount)
-    jobQueue = DispatchQueue(label: config.label, attributes:  [.concurrent])
+    jobQueue = DispatchQueue(label: Constant.label, attributes:  [.concurrent])
     super.init()
     
     operationsManager.delegate = self
@@ -81,23 +85,24 @@ extension CZOperationQueue: CZOperationsManagerDelegate {
   func operationDidFinish(_ operation: Operation,
                           areAllOperationsFinished: Bool) {
     if areAllOperationsFinished {
-      if operationsManager.areAllOperationsFinished {
-        notifyOperationsFinished()
-      } else {
-        runNextReadyOperations()
-      }
+      notifyOperationsFinished()
+    } else {
+      runNextReadyOperations()
     }
+    
+//    if areAllOperationsFinished {
+//      if operationsManager.areAllOperationsFinished {
+//        notifyOperationsFinished()
+//      } else {
+//        runNextReadyOperations()
+//      }
+//    }
   }
 }
 
 // MARK: - Private methods
 
 private extension CZOperationQueue {
-  private enum config {
-    static let maxConcurrentOperationCount: Int = .max
-    static let label = "com.CZOperationQueue.underlyingQueue"
-  }
-  
   func notifyOperationsFinished() {
     waitingSemaphore.signal()
   }
@@ -115,7 +120,7 @@ private extension CZOperationQueue {
     dbgPrint("\(#function): current operation count: \(operationsManager.operations.count); hasNextReadyOperation: \(operationsManager.hasNextReadyOperation)")
     
     while operationsManager.hasNextReadyOperation {
-      operationsManager.dequeueFirstReadyOperation { (operation, subqueue) in
+      operationsManager.dequeueFirstReadyOperation { (operation, _) in
         dbgPrint("dequeued operation: \(operation)")
         
         self.jobQueue.async {
