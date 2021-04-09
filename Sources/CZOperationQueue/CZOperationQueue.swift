@@ -7,18 +7,25 @@
 
 import Foundation
 
+/// Custom OperationQueue implemented with GCD - DispatchQueue.
+///
+/// It supports:
+///  - Concurrent operations
+///  - Operation priority
+///  - Operation dependencies
+///  - `maxConcurrentOperationCount`
 open class CZOperationQueue: NSObject {
   private let operationsManager: CZOperationsManager
-  
   private let jobQueue: DispatchQueue
   private let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-  var operations: [Operation] {
+  private var operations: [Operation] {
     return operationsManager.operations
   }
-  
+  /// Current executing operations count.
   var operationCount: Int {
     return operations.count
   }
+  /// Indicates whether the OperationQueue is suspended.
   var isSuspended: Bool {
     return false
   }
@@ -48,9 +55,12 @@ open class CZOperationQueue: NSObject {
   }
 }
 
+// MARK: - CZOperationsManagerDelegate
+
 extension CZOperationQueue: CZOperationsManagerDelegate {
-  func operation(_ operation: Operation, isFinished: Bool) {
-    if isFinished {
+  func operationDidFinish(_ operation: Operation,
+                          isAllOperationsFinished: Bool) {
+    if isAllOperationsFinished {
       if operationsManager.allOperationsFinished {
         notifyOperationsFinished()
       } else {

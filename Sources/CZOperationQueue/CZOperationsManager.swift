@@ -9,7 +9,7 @@ import Foundation
 import CZUtils
 
 protocol CZOperationsManagerDelegate: class {
-  func operation(_ operation: Operation, isFinished: Bool)
+  func operationDidFinish(_ operation: Operation, isAllOperationsFinished: Bool)
 }
 
 /// Thread-safe operations manager.
@@ -133,7 +133,7 @@ extension CZOperationsManager {
     removeFinishedObserver(from: operation)
     
     if let delegate = delegate {
-      delegate.operation(operation, isFinished: true)
+      delegate.operationDidFinish(operation, isAllOperationsFinished: true)
     }
   }
   func removeFinishedObserver(from operation: Operation) {
