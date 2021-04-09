@@ -99,9 +99,8 @@ private extension CZOperationQueue {
     
     while operationsManager.hasNextReadyOperation {
       operationsManager.dequeueFirstReadyOperation { (operation, subqueue) in
-        if let operation = operation as? TestOperation {
-          print("dequeued operation: \(operation.jobIndex)")
-        }
+        dbgPrint("dequeued operation: \(operation)")
+        
         self.jobQueue.async {
           if (operation.canStart) {
             operation.start()
