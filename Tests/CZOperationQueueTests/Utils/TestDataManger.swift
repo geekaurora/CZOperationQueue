@@ -14,7 +14,7 @@ public class TestDataManager: CustomStringConvertible {
   public func append(_ index: Int) {
     lock.writeLock {
       $0.append(index)
-      print("output: \($0)")
+      dbgPrint("output: \($0)")
     }
   }
   

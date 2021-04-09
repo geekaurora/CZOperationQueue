@@ -24,13 +24,13 @@ public class TestOperation: Operation {
   
   private func _execute() {
     guard !isCancelled else {
-      print("jobIndex \(jobIndex): was cancelled!")
+      dbgPrint("jobIndex \(jobIndex): was cancelled!")
       return
     }
-    print("jobIndex \(jobIndex): started!")
+    dbgPrint("jobIndex \(jobIndex): started!")
     Thread.sleep(forTimeInterval: sleepInterval)
     dataManager.append(jobIndex)
-    print("jobIndex \(jobIndex): finished!")
+    dbgPrint("jobIndex \(jobIndex): finished!")
   }
   
   public override var description: String {
