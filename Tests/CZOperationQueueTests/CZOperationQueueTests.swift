@@ -24,7 +24,7 @@ final class CZOperationQueueTests: XCTestCase {
     
     czOperationQueue?.addOperations(
       operations,
-      allOperationsFinishedClosure: {
+      allOperationsFinished: {
       // Fulfill the expectatation.
       expectation.fulfill()
         
