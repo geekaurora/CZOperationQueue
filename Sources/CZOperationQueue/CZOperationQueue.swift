@@ -18,7 +18,7 @@ import CZUtils
 ///
 open class CZOperationQueue: NSObject {
   private let jobQueue: DispatchQueue
-  private let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+  private let waitingSemaphore = DispatchSemaphore(value: 0)
   
   private let operationsManager: CZOperationsManager
   private var operations: [Operation] {
