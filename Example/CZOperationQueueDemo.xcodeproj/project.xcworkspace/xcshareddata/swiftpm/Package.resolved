@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "CZDispatchQueue",
-        "repositoryURL": "https://github.com/geekaurora/CZDispatchQueue.git",
-        "state": {
-          "branch": null,
-          "revision": "cea1171acfbf968a2427878655d086797deb97c5",
-          "version": "2.1.0"
-        }
-      },
-      {
         "package": "CZUtils",
         "repositoryURL": "https://github.com/geekaurora/CZUtils.git",
         "state": {

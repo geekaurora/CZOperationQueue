@@ -1,8 +1,3 @@
-//
-//  Created by Cheng Zhang on 7/11/17.
-//  Copyright © 2017 Cheng Zhang. All rights reserved.
-//
-
 import UIKit
 import CZOperationQueue
 

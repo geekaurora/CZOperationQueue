@@ -18,7 +18,7 @@ import CZUtils
 ///
 open class CZOperationQueue: NSObject {
   private let jobQueue: DispatchQueue
-  private let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+  private let waitingSemaphore = DispatchSemaphore(value: 0)
   
   private let operationsManager: CZOperationsManager
   private var operations: [Operation] {
@@ -47,13 +47,13 @@ open class CZOperationQueue: NSObject {
   }
   
   /// Adds the specified `operation` to the operation queue.
-  /// It will execute when it reaches the queue head based on its priority and is ready / has no unfinished dependencies,
+  /// `operation` will execute when it reaches the queue head based on its priority / readiness / dependencies.
   open func addOperation(_ operation: Operation) {
     _addOperation(operation)
   }
   
   /// Adds the specified `operations` to the operation queue.
-  /// Eash operation will execute when it reaches the queue head based on its priority and is ready / has no unfinished dependencies.
+  /// Eash operation will execute when it reaches the queue head based on its priority / readiness / dependencies.
   ///
   /// - Parameters:
   ///   - operations: operations to be executed.

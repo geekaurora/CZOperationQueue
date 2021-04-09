@@ -9,13 +9,13 @@ import Foundation
 import CZUtils
 
 /// Delegate that gets notified whenever an operation is finished.
-protocol CZOperationsManagerDelegate: class {
+internal protocol CZOperationsManagerDelegate: class {
   func operationDidFinish(_ operation: Operation, areAllOperationsFinished: Bool)
 }
 
 /// Thread safe manager that maintains underlying operations, it dequeues the first ready operation from the queue with
 /// ready state / priority / dependencies.
-class CZOperationsManager: NSObject {
+internal class CZOperationsManager: NSObject {
   typealias DequeueClosure = (Operation, inout [Operation]) -> Void
   typealias SubOperationQueues = [Operation.QueuePriority: [Operation]]
   
