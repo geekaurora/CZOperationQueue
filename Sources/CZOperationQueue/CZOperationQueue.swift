@@ -78,7 +78,7 @@ extension CZOperationQueue: CZOperationsManagerDelegate {
 private extension CZOperationQueue {
   private enum config {
     static let maxConcurrentOperationCount: Int = .max
-    static let label = "com.tony.underlyingQueue"
+    static let label = "com.CZOperationQueue.underlyingQueue"
   }
   
   func notifyOperationsFinished() {
@@ -102,7 +102,7 @@ private extension CZOperationQueue {
         dbgPrint("dequeued operation: \(operation)")
         
         self.jobQueue.async {
-          if (operation.canStart) {
+          if operation.canStart {
             operation.start()
           }
         }
