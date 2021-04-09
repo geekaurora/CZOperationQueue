@@ -3,10 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C3D3C2112620394100717883 /* CZOperationQueue in Frameworks */ = {isa = PBXBuildFile; productRef = C3D3C2102620394100717883 /* CZOperationQueue */; };
+		C3D3C2132620394100717883 /* CZOperationQueue in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C3D3C2102620394100717883 /* CZOperationQueue */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C3E8381A262038EE00432E18 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E83819262038EE00432E18 /* AppDelegate.swift */; };
 		C3E8381C262038EE00432E18 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E8381B262038EE00432E18 /* SceneDelegate.swift */; };
 		C3E8381E262038EE00432E18 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E8381D262038EE00432E18 /* ViewController.swift */; };
@@ -15,7 +17,22 @@
 		C3E83826262038EE00432E18 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3E83824262038EE00432E18 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		C3D3C2122620394100717883 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C3D3C2132620394100717883 /* CZOperationQueue in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		C3D3C20A2620393500717883 /* CZOperationQueue */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CZOperationQueue; path = ..; sourceTree = "<group>"; };
 		C3E83816262038EE00432E18 /* CZOperationQueueDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CZOperationQueueDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3E83819262038EE00432E18 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C3E8381B262038EE00432E18 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -31,6 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3D3C2112620394100717883 /* CZOperationQueue in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,11 +67,20 @@
 			path = "Supported Files";
 			sourceTree = "<group>";
 		};
+		C3D3C20F2620394100717883 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		C3E8380D262038EE00432E18 = {
 			isa = PBXGroup;
 			children = (
+				C3D3C20A2620393500717883 /* CZOperationQueue */,
 				C3E83818262038EE00432E18 /* CZOperationQueueDemo */,
 				C3E83817262038EE00432E18 /* Products */,
+				C3D3C20F2620394100717883 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -85,12 +112,17 @@
 				C3E83812262038EE00432E18 /* Sources */,
 				C3E83813262038EE00432E18 /* Frameworks */,
 				C3E83814262038EE00432E18 /* Resources */,
+				C3D3C2122620394100717883 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C3D3C20D2620393D00717883 /* PBXTargetDependency */,
 			);
 			name = CZOperationQueueDemo;
+			packageProductDependencies = (
+				C3D3C2102620394100717883 /* CZOperationQueue */,
+			);
 			productName = CZOperationQueueDemo;
 			productReference = C3E83816262038EE00432E18 /* CZOperationQueueDemo.app */;
 			productType = "com.apple.product-type.application";
@@ -152,6 +184,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C3D3C20D2620393D00717883 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = C3D3C20C2620393D00717883 /* CZOperationQueue */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		C3E8381F262038EE00432E18 /* Main.storyboard */ = {
@@ -349,6 +388,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C3D3C20C2620393D00717883 /* CZOperationQueue */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CZOperationQueue;
+		};
+		C3D3C2102620394100717883 /* CZOperationQueue */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CZOperationQueue;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C3E8380E262038EE00432E18 /* Project object */;
 }
