@@ -114,14 +114,16 @@ internal class CZOperationsManager: NSObject {
   func cancelAllOperations() {
     operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> OperationsMapByPriority? in
       var canceledCount = 0
-      for priority in CZOperationsManager.orderedPriorities {
-        guard operationsMapByPriority[priority] != nil else { continue }
+      for priority in Self.orderedPriorities {
+        guard operationsMapByPriority[priority] != nil else {
+          continue
+        }
         canceledCount += operationsMapByPriority[priority]!.count
-        operationsMapByPriority[priority]!.forEach{[weak self] in
+        operationsMapByPriority[priority]?.forEach{ [weak self] in
           $0.cancel()
           self?.removeFinishedObserver(from: $0)
         }
-        operationsMapByPriority[priority]!.removeAll()
+        operationsMapByPriority[priority]?.removeAll()
       }
       
       dbgPrint("\(#function): canceled \(canceledCount) operations.")
@@ -146,16 +148,17 @@ extension CZOperationsManager {
           Constant.kOperationFinishedKeyPath == keyPath else {
       return
     }
-    let isInExecutingQueue = self.executingOperationsLock.readLock{ $0.contains(operation) } ?? false
-    
-    if !isInExecutingQueue {
+    // Verify that `operation` state isn't executing.
+    let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
+    if !isOperationExecuting {
       assertionFailure("Error - attemped to cancel operation that isn't in executing queue.")
       return
     }
-    
+    // Remove `operation` from `executingOperations`.
     self.executingOperationsLock.writeLock{ $0.remove(operation) }
+    // Remove self from KVO observers of `operation`.
     removeFinishedObserver(from: operation)
-    
+    // Notify delegate that`operation` is finished.
     //delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
     delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
   }
