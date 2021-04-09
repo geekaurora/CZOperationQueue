@@ -8,13 +8,14 @@
 import Foundation
 
 open class CZOperationQueue: NSObject {
+  private let operationsManager: CZOperationsManager
   
-  private var operationsManager: CZOperationsManager
   private let jobQueue: DispatchQueue
   private let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
   var operations: [Operation] {
     return operationsManager.operations
   }
+  
   var operationCount: Int {
     return operations.count
   }
@@ -34,9 +35,9 @@ open class CZOperationQueue: NSObject {
     _addOperation(operation)
   }
   
-  open func addOperations(_ ops: [Operation], waitUntilFinished wait: Bool) {
-    ops.forEach { _addOperation($0, byAddOperations: true) }
-    _runNextOperations()
+  open func addOperations(_ operations: [Operation], waitUntilFinished wait: Bool) {
+    operations.forEach { _addOperation($0, shouldRunNextOperations: false) }
+    runNextOperations()
     
     // Sync execute: block current thread to wait until all operations finished
     waitingSemaphore.wait()
@@ -51,9 +52,9 @@ extension CZOperationQueue: CZOperationsManagerDelegate {
   func operation(_ operation: Operation, isFinished: Bool) {
     if isFinished {
       if operationsManager.allOperationsFinished {
-        _notifyOperationsFinished()
+        notifyOperationsFinished()
       } else {
-        _runNextOperations()
+        runNextOperations()
       }
     }
   }
@@ -65,18 +66,20 @@ private extension CZOperationQueue {
     static let label = "com.tony.underlyingQueue"
   }
   
-  func _notifyOperationsFinished() {
+  func notifyOperationsFinished() {
     waitingSemaphore.signal()
   }
   
-  func _addOperation(_ operation: Operation, byAddOperations: Bool = false) {
+  func _addOperation(_ operation: Operation,
+                     shouldRunNextOperations: Bool = true) {
     operationsManager.append(operation)
-    if (!byAddOperations) {
-      _runNextOperations()
+    
+    if shouldRunNextOperations {
+      runNextOperations()
     }
   }
   
-  func _runNextOperations() {
+  func runNextOperations() {
     print("\(#function): current operation count: \(operationsManager.operations.count); canExecuteNewOp: \(operationsManager.canExecuteNewOperation)")
     
     while (operationsManager.canExecuteNewOperation) {
