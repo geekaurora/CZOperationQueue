@@ -23,7 +23,7 @@ open class CZOperationQueue: NSObject {
   private var operations: [Operation] {
     return operationsManager.operations
   }
-  /// Current executing operations count.
+  /// The count of operations currently in the queue.
   var operationCount: Int {
     return operations.count
   }
@@ -34,6 +34,8 @@ open class CZOperationQueue: NSObject {
   /// The name of the OperationQueue.
   var name: String?
   
+  // MARK: - Initializer
+  
   public init(maxConcurrentOperationCount: Int = .max) {
     operationsManager = CZOperationsManager(maxConcurrentOperationCount: maxConcurrentOperationCount)
     jobQueue = DispatchQueue(label: config.label, attributes:  [.concurrent])
@@ -42,18 +44,30 @@ open class CZOperationQueue: NSObject {
     operationsManager.delegate = self
   }
   
+  /// Adds the specified `operation` to the operation queue.
+  /// It will execute when it reaches the queue head based on its priority and is ready / has no unfinished dependencies,
   open func addOperation(_ operation: Operation) {
     _addOperation(operation)
   }
   
-  open func addOperations(_ operations: [Operation], waitUntilFinished wait: Bool) {
-    operations.forEach { _addOperation($0, shouldRunNextOperations: false) }
+  /// Adds the specified `operations` to the operation queue.
+  /// Eash operation will execute when it reaches the queue head based on its priority and is ready / has no unfinished dependencies.
+  ///
+  /// - Parameters:
+  ///   - operations: operations to be executed.
+  ///   - waitUntilFinished: Indicates whether should wait on the current thread until all `operations` finish.
+  open func addOperations(_ operations: [Operation], waitUntilFinished: Bool = false) {
+    operations.forEach {
+      _addOperation($0, shouldRunNextOperations: false)
+    }
     runNextOperations()
     
-    // Sync execute: block current thread to wait until all operations finished
-    waitingSemaphore.wait()
+    if waitUntilFinished {
+      waitingSemaphore.wait()
+    }
   }
   
+  /// Cancels all queued and executing operations.
   open func cancelAllOperations() {
     operationsManager.cancelAllOperations()
   }
@@ -112,16 +126,4 @@ private extension CZOperationQueue {
   }
 }
 
-extension Operation {
-  var canStart: Bool {
-    return !isCancelled &&
-      isReady &&
-      !isExecuting &&
-      !hasUnfinishedDependency
-  }
-  var hasUnfinishedDependency: Bool {
-    dbgPrint("hasUnfinishedDependency operation: \(self); dependencies: \(dependencies)")
-    return dependencies.contains(where: {!$0.isFinished })
-  }
-}
 
