@@ -8,13 +8,13 @@
 import Foundation
 import CZUtils
 
-/// Custom OperationQueue implemented with GCD - DispatchQueue.
+/// Custom OperationQueue implemented with GCD - DispatchQueue (Without using NSOperationQueue).
 ///
 /// It supports:
 ///  - Concurrent operations
 ///  - Operation priority
 ///  - Operation dependencies
-///  - `maxConcurrentOperationCount`
+///  - maxConcurrentOperationCount
 ///
 open class CZOperationQueue: NSObject {
   private let operationsManager: CZOperationsManager
