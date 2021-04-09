@@ -1,3 +1,19 @@
 # CZOperationQueue
 
-A description of this package.
+Rewritten custom OperationQueue with GCD - DispatchQueue.
+
+## Functionality
+
+- Concurrent operations
+- Operation priority
+- Operation dependencies
+- `maxConcurrentOperationCount`
+
+
+### How gateKeeperQueue/jobQueue limits maxConcurrentOperationCount?
+<img src="./Diagrams/DispatchQueue-limitMax-Semaphore.png" width="650">
+
+
+
+
+
