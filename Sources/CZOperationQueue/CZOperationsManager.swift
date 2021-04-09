@@ -31,7 +31,7 @@ class CZOperationsManager: NSObject {
 
     var operations: [Operation] {
         return subOperationQueuesLock.readLock({ (subOperationQueues) -> [Operation]? in
-            [Operation](CZOperationsManager.priorityOrder.flatMap{ subOperationQueues[$0] }.joined())
+          [Operation](CZOperationsManager.priorityOrder.compactMap { subOperationQueues[$0] }.joined())
         }) ?? []
     }
 
