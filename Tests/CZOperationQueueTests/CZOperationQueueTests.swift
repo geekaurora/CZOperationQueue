@@ -106,22 +106,22 @@ final class CZOperationQueueTests: XCTestCase {
         // Verify priority: .veryLow < .low
         XCTAssertTrue(
           resultIndexOfOperation1 < resultIndexOfOperation0,
-          "Incorrect executing order of priority! resultIndexOfOperation0 = \(resultIndexOfOperation0), \nresultIndexOfOperation1=\(resultIndexOfOperation1)")
+          "Incorrect executing order of priority! resultIndexOfOperation1 = \(resultIndexOfOperation1), \nresultIndexOfOperation0 = \(resultIndexOfOperation0)")
 
         // Verify priority: .low < .normal
         XCTAssertTrue(
           resultIndexOfOperation7 < resultIndexOfOperation1,
-          "Incorrect executing order of priority! resultIndexOfOperation1 = \(resultIndexOfOperation1), \nresultIndexOfOperation7=\(resultIndexOfOperation7)")
+          "Incorrect executing order of priority! resultIndexOfOperation7 = \(resultIndexOfOperation7), \nresultIndexOfOperation1 = \(resultIndexOfOperation1)")
 
         // Verify priority: .normal < .high
         XCTAssertTrue(
           resultIndexOfOperation8 < resultIndexOfOperation7,
-          "Incorrect executing order of priority! resultIndexOfOperation7 = \(resultIndexOfOperation7), \nresultIndexOfOperation8=\(resultIndexOfOperation8)")
+          "Incorrect executing order of priority! resultIndexOfOperation8 = \(resultIndexOfOperation8), \resultIndexOfOperation7 = \(resultIndexOfOperation7)")
 
         // Verify priority: .high < .veryHigh
         XCTAssertTrue(
           resultIndexOfOperation6 < resultIndexOfOperation8,
-          "Incorrect executing order of priority! resultIndexOfOperation7 = \(resultIndexOfOperation7), \nresultIndexOfOperation8=\(resultIndexOfOperation8)")
+          "Incorrect executing order of priority! resultIndexOfOperation6 = \(resultIndexOfOperation6), \nresultIndexOfOperation8= \(resultIndexOfOperation8)")
         
         // Fulfill the expectatation.
         expectation.fulfill()
