@@ -9,10 +9,10 @@ import Foundation
 import CZUtils
 
 protocol CZOperationsManagerDelegate: class {
-    func operation(_ op: Operation, isFinished: Bool)
+    func operation(_ operation: Operation, isFinished: Bool)
 }
 
-/// Thread-safe operations manager
+/// Thread-safe operations manager.
 class CZOperationsManager: NSObject {
     typealias DequeueClosure = (Operation, inout [Operation]) -> Void
     typealias SubOperationQueues = [Operation.QueuePriority: [Operation]]
@@ -67,13 +67,13 @@ class CZOperationsManager: NSObject {
             for priority in CZOperationsManager.priorityOrder {
                 // Shouldn't assign to new variable? - Copy: var subqueue = subOperationQueues[priority]
                 guard subOperationQueues[priority] != nil else { continue }
-                if let op =  subOperationQueues[priority]?.first(where: {$0.canStart}) {
-                    subOperationQueues[priority]!.remove(op)
+                if let operation =  subOperationQueues[priority]?.first(where: {$0.canStart}) {
+                    subOperationQueues[priority]!.remove(operation)
                     self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
-                        executingOps.append(op)
+                        executingOps.append(operation)
                         return executingOps
                     })
-                    dequeueClosure(op, &(subOperationQueues[priority]!))
+                    dequeueClosure(operation, &(subOperationQueues[priority]!))
                     break
                 }
             }

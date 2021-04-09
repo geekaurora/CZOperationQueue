@@ -34,8 +34,8 @@ open class CZOperationQueue: NSObject {
         operationsManager.delegate = self
     }
 
-    open func addOperation(_ op: Operation) {
-        _addOperation(op)
+    open func addOperation(_ operation: Operation) {
+        _addOperation(operation)
     }
 
     open func addOperations(_ ops: [Operation], waitUntilFinished wait: Bool) {
@@ -52,7 +52,7 @@ open class CZOperationQueue: NSObject {
 }
 
 extension CZOperationQueue: CZOperationsManagerDelegate {
-    func operation(_ op: Operation, isFinished: Bool) {
+    func operation(_ operation: Operation, isFinished: Bool) {
         if isFinished {
             if operationsManager.allOperationsFinished {
                 _notifyOperationsFinished()
@@ -73,8 +73,8 @@ private extension CZOperationQueue {
         waitingSemaphore.signal()
     }
 
-    func _addOperation(_ op: Operation, byAddOperations: Bool = false) {
-        operationsManager.append(op)
+    func _addOperation(_ operation: Operation, byAddOperations: Bool = false) {
+        operationsManager.append(operation)
         if (!byAddOperations) {
             _runNextOperations()
         }
@@ -84,13 +84,13 @@ private extension CZOperationQueue {
         print("\(#function): current operation count: \(operationsManager.operations.count); canExecuteNewOp: \(operationsManager.canExecuteNewOperation)")
         
         while (operationsManager.canExecuteNewOperation) {
-            operationsManager.dequeueFirstReadyOp { (op, subqueue) in
-                if let op = op as? TestOperation {
-                    print("dequeued op: \(op.jobIndex)")
+            operationsManager.dequeueFirstReadyOp { (operation, subqueue) in
+                if let operation = operation as? TestOperation {
+                    print("dequeued operation: \(operation.jobIndex)")
                 }
                 self.jobQueue.async {
-                    if (op.canStart) {
-                        op.start()
+                    if (operation.canStart) {
+                        operation.start()
                     }
                 }
             }
@@ -106,8 +106,8 @@ extension Operation {
                !hasUncompleteDependency
     }
     var hasUncompleteDependency: Bool {
-        if let op = self as? TestOperation, op.jobIndex == 8 {
-            print("hasUncompleteDependency op: \(op.jobIndex); dependencies: \(op.dependencies)")
+        if let operation = self as? TestOperation, operation.jobIndex == 8 {
+            print("hasUncompleteDependency operation: \(operation.jobIndex); dependencies: \(operation.dependencies)")
         }
         return dependencies.contains(where: {!$0.isFinished })
     }
