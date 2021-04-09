@@ -30,6 +30,7 @@ public class TestOperation: Operation {
     }
     dbgPrint("jobIndex \(jobIndex): started!")
     Thread.sleep(forTimeInterval: sleepInterval)
+    isExecuted = true
     dataManager.append(jobIndex)
     dbgPrint("jobIndex \(jobIndex): finished!")
   }

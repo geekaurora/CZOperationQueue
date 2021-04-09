@@ -29,6 +29,9 @@ open class CZOperationQueue: NSObject {
     static let label = "com.CZOperationQueue.underlyingQueue"
   }
 
+  /// Closure that gets called when all operations have been finished.
+  public typealias AllOperationsFinishedClosure = () -> Void
+  private var allOperationsFinishedClosure: AllOperationsFinishedClosure?
   /// The count of operations currently in the queue.
   var operationCount: Int {
     return operations.count
@@ -38,7 +41,7 @@ open class CZOperationQueue: NSObject {
     return false
   }
   /// The name of the OperationQueue.
-  var name: String?
+  public private(set) var name: String?
   
   // MARK: - Initializer
   
@@ -66,7 +69,15 @@ open class CZOperationQueue: NSObject {
   /// - Parameters:
   ///   - operations: operations to be executed.
   ///   - waitUntilFinished: Indicates whether should wait on the current thread until all `operations` finish.
-  open func addOperations(_ operations: [Operation], waitUntilFinished: Bool = false) {
+  open func addOperations(_ operations: [Operation],
+                          waitUntilFinished: Bool = false,
+                          allOperationsFinishedClosure: AllOperationsFinishedClosure? = nil) {
+    assert(
+      !waitUntilFinished || allOperationsFinishedClosure == nil,
+      "Should only set `waitUntilFinished` to true or `allOperationsFinishedClosure`.")
+    
+    self.allOperationsFinishedClosure = allOperationsFinishedClosure
+    
     operations.forEach {
       _addOperation($0, shouldRunNextOperations: false)
     }
@@ -108,6 +119,7 @@ extension CZOperationQueue: CZOperationsManagerDelegate {
 
 private extension CZOperationQueue {
   func notifyOperationsFinished() {
+    allOperationsFinishedClosure?()
     waitingSemaphore.signal()
   }
   
