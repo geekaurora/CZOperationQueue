@@ -132,8 +132,9 @@ final class CZOperationQueueTests: XCTestCase {
   }
   
   /// Test add Operations with priority.
-  /// Add Operation with .veryHigh  priority after 3 secs
-  func testAddOperationsWithPriority2() {
+  /// Add Operation with .veryHigh  priority after 1 sec.
+  /// Note: should consider concurrent executions with`maxConcurrentOperationCount` as 3 every sec.
+  func testAddOperationsWithPriorityByDelayAddingVeryHighPriorityOperation() {
     let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
     
     // Init operations with priority.
@@ -172,8 +173,8 @@ final class CZOperationQueueTests: XCTestCase {
         expectation.fulfill()
       })
     
-    // Add Operation with .veryHigh  priority after 3 secs.
-    DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 3) {
+    // Add Operation with .veryHigh  priority after 1 sec.
+    DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {
       let operation = TestOperation(11, dataManager: self.dataManager)
       operation.queuePriority = .veryHigh
       self.czOperationQueue.addOperation(operation)
