@@ -160,13 +160,13 @@ final class CZOperationQueueTests: XCTestCase {
         // Verify `operations` execution order - should correspond to priorities.
         // operations[0].queuePriority = .veryLow
         let resultIndexOfOperation0 = self.dataManager.index(of: 0)!
-        // operations[1].queuePriority = .low
-        let resultIndexOfOperation1 = self.dataManager.index(of: 1)!
+        // operations[11].queuePriority = .veryHigh
+        let resultIndexOfOperation11 = self.dataManager.index(of: 11)!
 
-//        // Verify priority: .veryLow < .low
-//        XCTAssertTrue(
-//          resultIndexOfOperation1 < resultIndexOfOperation0,
-//          "Incorrect executing order of priority! resultIndexOfOperation1 = \(resultIndexOfOperation1), \nresultIndexOfOperation0 = \(resultIndexOfOperation0)")
+        // Verify priority: .veryLow < .veryHigh
+        XCTAssertTrue(
+          resultIndexOfOperation11 < resultIndexOfOperation0,
+          "Incorrect executing order of priority! resultIndexOfOperation11 = \(resultIndexOfOperation11), \nresultIndexOfOperation0 = \(resultIndexOfOperation0)")
         
         // Fulfill the expectatation.
         expectation.fulfill()
