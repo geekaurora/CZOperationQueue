@@ -21,7 +21,7 @@ open class CZDispatchQueue: NSObject {
     private let semaphore: DispatchSemaphore
 
     /// Configuration constants
-    private struct Config {
+    private enum Config {
         static let defaultmaxConcurrentCount = 3
     }
     private enum QueueLabel: String {
