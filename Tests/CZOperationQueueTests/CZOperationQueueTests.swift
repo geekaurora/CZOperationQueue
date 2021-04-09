@@ -4,14 +4,14 @@ import CZTestUtils
 @testable import CZOperationQueue
 
 final class CZOperationQueueTests: XCTestCase {
-  private lazy var testDataManager = TestDataManager.shared
+  private lazy var dataManager = TestDataManager.shared
   private var czOperationQueue: CZOperationQueue?
   
   func testAddOperation() {
-    testDataManager.removeAll()
+    dataManager.removeAll()
     czOperationQueue = CZOperationQueue(maxConcurrentOperationCount: 3)
     
-    let operations = (0...10).map {TestOperation($0, testDataManager: testDataManager)}
+    let operations = (0...10).map { TestOperation($0, dataManager: dataManager) }
     operations[0].queuePriority = .veryLow
     operations[1].queuePriority = .low
     operations[6].queuePriority = .veryHigh
@@ -26,11 +26,11 @@ final class CZOperationQueueTests: XCTestCase {
     
     //        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 3) {[weak self] in
     //            guard let `self` = self else { return }
-    //            let operation = TestOperation(11, testDataManager: self.testDataManager)
+    //            let operation = TestOperation(11, dataManager: self.dataManager)
     //            operation.queuePriority = .veryHigh
     //            self.czOperationQueue?.addOperation(operation)
     //        }
     
-    print("TestDataManager: \(testDataManager)")
+    print("TestDataManager: \(dataManager)")
   }
 }

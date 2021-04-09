@@ -2,10 +2,9 @@ import Foundation
 import CZUtils
 
 public class TestDataManager: CustomStringConvertible {
-  
   public static let shared = TestDataManager()
-  
   typealias Output = [Int]
+  
   var output = Output()
   let lock: CZMutexLock<Output> = CZMutexLock(Output())
   let mutexLock = DispatchSemaphore(value: 0)

@@ -1,6 +1,7 @@
 import UIKit
 import CZOperationQueue
 
+/*
 class NSOperationQueueTester {
   private lazy var testDataManager = TestDataManager.shared
   private lazy var operationQueue: OperationQueue = {
@@ -28,3 +29,4 @@ class NSOperationQueueTester {
     print("TestDataManager: \(testDataManager)")
   }
 }
+ */

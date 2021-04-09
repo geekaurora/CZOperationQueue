@@ -2,14 +2,14 @@ import Foundation
 import CZUtils
 
 public class TestOperation: Operation {
-  private var testDataManager: TestDataManager
+  private var dataManager: TestDataManager
   let sleepInterval: TimeInterval
   let jobIndex: Int
   
-  public init(_ jobIndex: Int, sleepInterval: TimeInterval = 1, testDataManager: TestDataManager) {
+  public init(_ jobIndex: Int, sleepInterval: TimeInterval = 1, dataManager: TestDataManager) {
     self.jobIndex = jobIndex
     self.sleepInterval = sleepInterval
-    self.testDataManager = testDataManager
+    self.dataManager = dataManager
     super.init()
   }
   
@@ -29,7 +29,7 @@ public class TestOperation: Operation {
     }
     print("jobIndex \(jobIndex): started!")
     Thread.sleep(forTimeInterval: sleepInterval)
-    testDataManager.append(jobIndex)
+    dataManager.append(jobIndex)
     print("jobIndex \(jobIndex): finished!")
   }
   

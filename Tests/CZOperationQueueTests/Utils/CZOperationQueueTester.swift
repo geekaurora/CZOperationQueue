@@ -1,6 +1,7 @@
 import UIKit
 import CZOperationQueue
 
+/*
 class CZOperationQueueTester {
   private lazy var testDataManager = TestDataManager.shared
   private var czOperationQueue: CZOperationQueue?
@@ -34,4 +35,4 @@ class CZOperationQueueTester {
   
 }
 
-
+*/
