@@ -120,7 +120,7 @@ private extension CZOperationQueue {
     dbgPrint("\(#function): current operation count: \(operationsManager.operations.count); hasNextReadyOperation: \(operationsManager.hasNextReadyOperation)")
     
     while operationsManager.hasNextReadyOperation {
-      operationsManager.dequeueFirstReadyOperation { (operation, subqueue) in
+      operationsManager.dequeueFirstReadyOperation { (operation, _) in
         dbgPrint("dequeued operation: \(operation)")
         
         self.jobQueue.async {
