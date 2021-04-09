@@ -2,14 +2,15 @@ import Foundation
 import CZUtils
 
 public class TestOperation: Operation {
-  private var testDataManager: TestDataManager
+  private var dataManager: TestDataManager
   let sleepInterval: TimeInterval
   let jobIndex: Int
-  
-  public init(_ jobIndex: Int, sleepInterval: TimeInterval = 1, testDataManager: TestDataManager) {
+  var isExecuted = false
+
+  public init(_ jobIndex: Int, sleepInterval: TimeInterval = 1, dataManager: TestDataManager) {
     self.jobIndex = jobIndex
     self.sleepInterval = sleepInterval
-    self.testDataManager = testDataManager
+    self.dataManager = dataManager
     super.init()
   }
   
@@ -24,13 +25,14 @@ public class TestOperation: Operation {
   
   private func _execute() {
     guard !isCancelled else {
-      print("jobIndex \(jobIndex): was cancelled!")
+      dbgPrint("jobIndex \(jobIndex): was cancelled!")
       return
     }
-    print("jobIndex \(jobIndex): started!")
+    dbgPrint("jobIndex \(jobIndex): started!")
     Thread.sleep(forTimeInterval: sleepInterval)
-    testDataManager.append(jobIndex)
-    print("jobIndex \(jobIndex): finished!")
+    isExecuted = true
+    dataManager.append(jobIndex)
+    dbgPrint("jobIndex \(jobIndex): finished!")
   }
   
   public override var description: String {
