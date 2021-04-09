@@ -9,7 +9,7 @@ import Foundation
 import CZUtils
 
 protocol CZOperationsManagerDelegate: class {
-  func operationDidFinish(_ operation: Operation, isAllOperationsFinished: Bool)
+  func operationDidFinish(_ operation: Operation, areAllOperationsFinished: Bool)
 }
 
 /// Thread-safe operations manager.
@@ -30,32 +30,34 @@ class CZOperationsManager: NSObject {
     return executingOperationsLock.readLock{ $0 } ?? []
   }
   
-  init(maxConcurrentOperationCount: Int = .max) {
-    self.maxConcurrentOperationCount = maxConcurrentOperationCount
-    super.init()
-  }
-  
   var operations: [Operation] {
     return subOperationQueuesLock.readLock({ (subOperationQueues) -> [Operation]? in
       [Operation](CZOperationsManager.orderedPriorities.compactMap { subOperationQueues[$0] }.joined())
     }) ?? []
   }
   
-  var reachedMaxConcurrentCount: Bool {
+  private var reachedMaxConcurrentCount: Bool {
     return executingOperationsLock.readLock({[weak self] in
       guard let `self` = self else {return false}
       return $0.count >= self.maxConcurrentOperationCount
     }) ?? false
   }
   
-  var hasReadyOperation: Bool {
+  private var hasReadyOperation: Bool {
     return operations.contains(where: {$0.canStart})
   }
-  var canExecuteNewOperation: Bool {
+  var hasNextReadyOperation: Bool {
     return hasReadyOperation && !reachedMaxConcurrentCount
   }
-  var allOperationsFinished: Bool {
+  var areAllOperationsFinished: Bool {
     return operations.isEmpty && executingOperations.isEmpty
+  }
+  
+  // MARK: - Initializer
+  
+  init(maxConcurrentOperationCount: Int = .max) {
+    self.maxConcurrentOperationCount = maxConcurrentOperationCount
+    super.init()
   }
   
   func append(_ operation: Operation) {
@@ -68,7 +70,7 @@ class CZOperationsManager: NSObject {
     }
   }
   
-  func dequeueFirstReadyOp(dequeueClosure: @escaping DequeueClosure) {
+  func dequeueFirstReadyOperation(dequeueClosure: @escaping DequeueClosure) {
     subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
       for priority in CZOperationsManager.orderedPriorities {
         // Shouldn't assign to new variable? - Copy: var subqueue = subOperationQueues[priority]
@@ -132,7 +134,7 @@ extension CZOperationsManager {
     self.executingOperationsLock.writeLock{ $0.remove(operation) }
     removeFinishedObserver(from: operation)
     
-    delegate?.operationDidFinish(operation, isAllOperationsFinished: true)
+    delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
   }
   func removeFinishedObserver(from operation: Operation) {
     operation.removeObserver(self, forKeyPath: config.kOpFinishedKeyPath)

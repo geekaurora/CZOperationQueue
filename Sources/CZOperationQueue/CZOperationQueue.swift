@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CZUtils
 
 /// Custom OperationQueue implemented with GCD - DispatchQueue.
 ///
@@ -29,12 +30,14 @@ open class CZOperationQueue: NSObject {
   var isSuspended: Bool {
     return false
   }
+  /// The name of the OperationQueue.
   var name: String?
   
   public init(maxConcurrentOperationCount: Int = .max) {
     operationsManager = CZOperationsManager(maxConcurrentOperationCount: maxConcurrentOperationCount)
     jobQueue = DispatchQueue(label: config.label, attributes:  [.concurrent])
     super.init()
+    
     operationsManager.delegate = self
   }
   
@@ -59,9 +62,9 @@ open class CZOperationQueue: NSObject {
 
 extension CZOperationQueue: CZOperationsManagerDelegate {
   func operationDidFinish(_ operation: Operation,
-                          isAllOperationsFinished: Bool) {
-    if isAllOperationsFinished {
-      if operationsManager.allOperationsFinished {
+                          areAllOperationsFinished: Bool) {
+    if areAllOperationsFinished {
+      if operationsManager.areAllOperationsFinished {
         notifyOperationsFinished()
       } else {
         runNextOperations()
@@ -70,8 +73,10 @@ extension CZOperationQueue: CZOperationsManagerDelegate {
   }
 }
 
+// MARK: - Private methods
+
 private extension CZOperationQueue {
-  private struct config {
+  private enum config {
     static let maxConcurrentOperationCount: Int = .max
     static let label = "com.tony.underlyingQueue"
   }
@@ -90,10 +95,10 @@ private extension CZOperationQueue {
   }
   
   func runNextOperations() {
-    print("\(#function): current operation count: \(operationsManager.operations.count); canExecuteNewOp: \(operationsManager.canExecuteNewOperation)")
+    dbgPrint("\(#function): current operation count: \(operationsManager.operations.count); canExecuteNewOp: \(operationsManager.hasNextReadyOperation)")
     
-    while (operationsManager.canExecuteNewOperation) {
-      operationsManager.dequeueFirstReadyOp { (operation, subqueue) in
+    while operationsManager.hasNextReadyOperation {
+      operationsManager.dequeueFirstReadyOperation { (operation, subqueue) in
         if let operation = operation as? TestOperation {
           print("dequeued operation: \(operation.jobIndex)")
         }
