@@ -131,6 +131,58 @@ final class CZOperationQueueTests: XCTestCase {
     waitForExpectatation()
   }
   
+  /// Test add Operations with priority.
+  /// Add Operation with .veryHigh  priority after 3 secs
+  func testAddOperationsWithPriority2() {
+    let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
+    
+    // Init operations with priority.
+    let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
+    operations[0].queuePriority = .veryLow
+    operations[1].queuePriority = .low
+    operations[8].queuePriority = .high
+    operations[6].queuePriority = .veryHigh
+
+    // Add operations.
+    czOperationQueue.addOperations(
+      operations,
+      allOperationsFinished: {
+        dbgPrint("dataManager: \(self.dataManager)")
+        
+        // Verify `operations` have been executed.
+        XCTAssertTrue(!operations.contains { !$0.isExecuted }, "All operations should have been executed.")
+       
+        // Verify results of dataManager are correct.
+        let expected = Set(MockData.testIndexesArray + [11])
+        let actual = Set(self.dataManager.results())
+        XCTAssertEqual(expected, actual, "Results are incorrect! expected = \(expected), \nactual=\(actual)")
+       
+        // Verify `operations` execution order - should correspond to priorities.
+        // operations[0].queuePriority = .veryLow
+        let resultIndexOfOperation0 = self.dataManager.index(of: 0)!
+        // operations[1].queuePriority = .low
+        let resultIndexOfOperation1 = self.dataManager.index(of: 1)!
+
+//        // Verify priority: .veryLow < .low
+//        XCTAssertTrue(
+//          resultIndexOfOperation1 < resultIndexOfOperation0,
+//          "Incorrect executing order of priority! resultIndexOfOperation1 = \(resultIndexOfOperation1), \nresultIndexOfOperation0 = \(resultIndexOfOperation0)")
+        
+        // Fulfill the expectatation.
+        expectation.fulfill()
+      })
+    
+    // Add Operation with .veryHigh  priority after 3 secs.
+    DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 3) {
+      let operation = TestOperation(11, dataManager: self.dataManager)
+      operation.queuePriority = .veryHigh
+      self.czOperationQueue.addOperation(operation)
+    }
+    
+    // Wait for expectatation.
+    waitForExpectatation()
+  }
+  
   func testAddOperationWithDependency() {
     let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
     
