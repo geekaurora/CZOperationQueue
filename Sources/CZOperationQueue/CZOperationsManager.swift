@@ -5,7 +5,7 @@
 //  Copyright © 2017 Cheng Zhang. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import CZUtils
 
 protocol CZOperationsManagerDelegate: class {
