@@ -5,7 +5,8 @@ public class TestOperation: Operation {
   private var dataManager: TestDataManager
   let sleepInterval: TimeInterval
   let jobIndex: Int
-  
+  var isExecuted = false
+
   public init(_ jobIndex: Int, sleepInterval: TimeInterval = 1, dataManager: TestDataManager) {
     self.jobIndex = jobIndex
     self.sleepInterval = sleepInterval

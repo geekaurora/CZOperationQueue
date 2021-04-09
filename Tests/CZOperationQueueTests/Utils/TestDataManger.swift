@@ -3,37 +3,36 @@ import CZUtils
 
 public class TestDataManager: CustomStringConvertible {
   public static let shared = TestDataManager()
-  typealias Output = [Int]
+  typealias Results = [Int]
   
-  var output = Output()
-  let lock: CZMutexLock<Output> = CZMutexLock(Output())
+  let resultsLock = CZMutexLock(Results())
   let mutexLock = DispatchSemaphore(value: 0)
   
   public init(){}
   
   public func append(_ index: Int) {
-    lock.writeLock {
+    resultsLock.writeLock {
       $0.append(index)
-      dbgPrint("output: \($0)")
+      dbgPrint("results: \($0)")
     }
   }
   
   public func removeAll() {
-    lock.writeLock { (output) -> Output? in
-      output.removeAll()
-      return output
+    resultsLock.writeLock { (results) -> Results? in
+      results.removeAll()
+      return results
     }
   }
   
   public func index(of obj: Int) -> Int? {
-    return lock.readLock { (output) -> Int? in
-      return output.index(of: obj)
+    return resultsLock.readLock { (results) -> Int? in
+      return results.index(of: obj)
     }
   }
   
   public var description: String {
-    return lock.readLock { (output) -> String? in
-      return "output: \(output)"
+    return resultsLock.readLock { (results) -> String? in
+      return "results: \(results)"
     } ?? ""
   }
 }
