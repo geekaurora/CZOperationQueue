@@ -5,16 +5,19 @@ import CZTestUtils
 
 final class CZOperationQueueTests: XCTestCase {
   private lazy var dataManager = TestDataManager.shared
-  private var czOperationQueue: CZOperationQueue?
+  private var czOperationQueue: CZOperationQueue!
   private enum Constant {
     static let timeOut: TimeInterval = 30
+    static let maxConcurrentOperationCount = 3
   }
   
-  func testAddOperation() {
-    let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
-    
+  override func setUp() {
     dataManager.removeAll()
-    czOperationQueue = CZOperationQueue(maxConcurrentOperationCount: 3)
+    czOperationQueue = CZOperationQueue(maxConcurrentOperationCount: Constant.maxConcurrentOperationCount)
+  }
+  
+  func testAddOperationWithDependency() {
+    let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
     
     let operations = (0...10).map { TestOperation($0, dataManager: dataManager) }
     operations[0].queuePriority = .veryLow
@@ -22,7 +25,7 @@ final class CZOperationQueueTests: XCTestCase {
     operations[6].queuePriority = .veryHigh
     operations[8].addDependency(operations[0])
     
-    czOperationQueue?.addOperations(
+    czOperationQueue.addOperations(
       operations,
       allOperationsFinished: {
       // Fulfill the expectatation.
@@ -43,8 +46,6 @@ final class CZOperationQueueTests: XCTestCase {
     //        }
     
     dbgPrint("TestDataManager: \(dataManager)")
-    
-
     
     // Wait for expectatation.
     waitForExpectatation()
