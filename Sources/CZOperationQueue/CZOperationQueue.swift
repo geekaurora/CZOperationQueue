@@ -119,9 +119,9 @@ extension Operation {
       !hasUncompleteDependency
   }
   var hasUncompleteDependency: Bool {
-    if let operation = self as? TestOperation, operation.jobIndex == 8 {
-      print("hasUncompleteDependency operation: \(operation.jobIndex); dependencies: \(operation.dependencies)")
-    }
+    //if let operation = self as? TestOperation, operation.jobIndex == 8 {
+    dbgPrint("hasUncompleteDependency operation: \(self); dependencies: \(dependencies)")
+    //}
     return dependencies.contains(where: {!$0.isFinished })
   }
 }

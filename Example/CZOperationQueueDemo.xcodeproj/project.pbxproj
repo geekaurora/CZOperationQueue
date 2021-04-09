@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C36F22F12620455E00A14CF4 /* TestDataManger.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36F22EF2620455E00A14CF4 /* TestDataManger.swift */; };
+		C36F22F22620455E00A14CF4 /* TestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36F22F02620455E00A14CF4 /* TestOperation.swift */; };
+		C36F22F5262045E400A14CF4 /* CZUtils in Frameworks */ = {isa = PBXBuildFile; productRef = C36F22F4262045E400A14CF4 /* CZUtils */; };
+		C36F22F6262045E400A14CF4 /* CZUtils in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C36F22F4262045E400A14CF4 /* CZUtils */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C3D3C2112620394100717883 /* CZOperationQueue in Frameworks */ = {isa = PBXBuildFile; productRef = C3D3C2102620394100717883 /* CZOperationQueue */; };
 		C3D3C2132620394100717883 /* CZOperationQueue in Embed Frameworks */ = {isa = PBXBuildFile; productRef = C3D3C2102620394100717883 /* CZOperationQueue */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C3D3C2162620396400717883 /* CZOperationQueueTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D3C2142620396400717883 /* CZOperationQueueTester.swift */; };
@@ -27,6 +31,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				C3D3C2132620394100717883 /* CZOperationQueue in Embed Frameworks */,
+				C36F22F6262045E400A14CF4 /* CZUtils in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -34,6 +39,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C36F22EF2620455E00A14CF4 /* TestDataManger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDataManger.swift; sourceTree = "<group>"; };
+		C36F22F02620455E00A14CF4 /* TestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestOperation.swift; sourceTree = "<group>"; };
 		C3D3C20A2620393500717883 /* CZOperationQueue */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CZOperationQueue; path = ..; sourceTree = "<group>"; };
 		C3D3C2142620396400717883 /* CZOperationQueueTester.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CZOperationQueueTester.swift; sourceTree = "<group>"; };
 		C3D3C2152620396400717883 /* NSOperationQueueTester.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSOperationQueueTester.swift; sourceTree = "<group>"; };
@@ -53,6 +60,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3D3C2112620394100717883 /* CZOperationQueue in Frameworks */,
+				C36F22F5262045E400A14CF4 /* CZUtils in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,6 +110,8 @@
 				C3E8381D262038EE00432E18 /* ViewController.swift */,
 				C3D3C2142620396400717883 /* CZOperationQueueTester.swift */,
 				C3D3C2152620396400717883 /* NSOperationQueueTester.swift */,
+				C36F22EF2620455E00A14CF4 /* TestDataManger.swift */,
+				C36F22F02620455E00A14CF4 /* TestOperation.swift */,
 				C3E83827262038EE00432E18 /* Info.plist */,
 				C3D3C2072620390700717883 /* Supported Files */,
 			);
@@ -128,6 +138,7 @@
 			name = CZOperationQueueDemo;
 			packageProductDependencies = (
 				C3D3C2102620394100717883 /* CZOperationQueue */,
+				C36F22F4262045E400A14CF4 /* CZUtils */,
 			);
 			productName = CZOperationQueueDemo;
 			productReference = C3E83816262038EE00432E18 /* CZOperationQueueDemo.app */;
@@ -156,6 +167,9 @@
 				Base,
 			);
 			mainGroup = C3E8380D262038EE00432E18;
+			packageReferences = (
+				C36F22F3262045E400A14CF4 /* XCRemoteSwiftPackageReference "CZUtils" */,
+			);
 			productRefGroup = C3E83817262038EE00432E18 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -184,8 +198,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3E8381E262038EE00432E18 /* ViewController.swift in Sources */,
+				C36F22F22620455E00A14CF4 /* TestOperation.swift in Sources */,
 				C3E8381A262038EE00432E18 /* AppDelegate.swift in Sources */,
 				C3E8381C262038EE00432E18 /* SceneDelegate.swift in Sources */,
+				C36F22F12620455E00A14CF4 /* TestDataManger.swift in Sources */,
 				C3D3C2162620396400717883 /* CZOperationQueueTester.swift in Sources */,
 				C3D3C2172620396400717883 /* NSOperationQueueTester.swift in Sources */,
 			);
@@ -397,7 +413,23 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		C36F22F3262045E400A14CF4 /* XCRemoteSwiftPackageReference "CZUtils" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/geekaurora/CZUtils.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		C36F22F4262045E400A14CF4 /* CZUtils */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C36F22F3262045E400A14CF4 /* XCRemoteSwiftPackageReference "CZUtils" */;
+			productName = CZUtils;
+		};
 		C3D3C20C2620393D00717883 /* CZOperationQueue */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CZOperationQueue;
