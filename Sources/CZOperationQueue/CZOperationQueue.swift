@@ -8,11 +8,7 @@
 import Foundation
 
 open class CZOperationQueue: NSObject {
-    public var maxConcurrentOperationCount: Int = .max {
-        didSet {
-            operationsManager.maxConcurrentOperationCount = maxConcurrentOperationCount
-        }
-    }
+
     private var operationsManager: CZOperationsManager
     private let jobQueue: DispatchQueue
     private let waitingSemaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
@@ -27,8 +23,8 @@ open class CZOperationQueue: NSObject {
     }
     var name: String?
 
-    public override init() {
-        operationsManager = CZOperationsManager()
+    public init(maxConcurrentOperationCount: Int = .max) {
+      operationsManager = CZOperationsManager(maxConcurrentOperationCount: maxConcurrentOperationCount)
         jobQueue = DispatchQueue(label: config.label, attributes:  [.concurrent])
         super.init()
         operationsManager.delegate = self

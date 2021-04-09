@@ -12,8 +12,7 @@ class CZOperationQueueTester {
 
     func test() {
         testDataManager.removeAll()
-        gpOperationQueue = CZOperationQueue()
-        gpOperationQueue?.maxConcurrentOperationCount = 3
+      gpOperationQueue = CZOperationQueue(maxConcurrentOperationCount: 3)
         
         let operations = (0...10).map {TestOperation($0, testDataManager: testDataManager)}
         operations[0].queuePriority = .veryLow
