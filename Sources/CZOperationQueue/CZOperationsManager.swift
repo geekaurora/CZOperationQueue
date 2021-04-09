@@ -22,7 +22,9 @@ internal class CZOperationsManager: NSObject {
   private enum Constant {
     static let kOperationFinishedKeyPath = "isFinished"
   }
-  private static let orderedPriorities: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
+  private static let orderedPriorities: [Operation.QueuePriority] = [
+    .veryHigh, .high, .normal, .low, .veryLow
+  ]
   private lazy var operationsMapByPriorityLock = CZMutexLock(OperationsMapByPriority())
   private lazy var executingOperationsLock = CZMutexLock([Operation]())
   
@@ -36,16 +38,18 @@ internal class CZOperationsManager: NSObject {
     }) ?? false
   }
   private var hasReadyOperation: Bool {
-    return operations.contains(where: {$0.canStart})
+    return operations.contains { $0.canStart }
   }
   
   /// Delegate that gets notified whenever an operation is finished.
   weak var delegate: CZOperationsManagerDelegate?
   
-  /// All operations that are currently in the queue.
+  /// All operations that are currently in the queue - ordered by priority descendingly.
   var operations: [Operation] {
     return operationsMapByPriorityLock.readLock({ (operationsMapByPriority) -> [Operation]? in
-      [Operation](CZOperationsManager.orderedPriorities.compactMap { operationsMapByPriority[$0] }.joined())
+      [Operation](CZOperationsManager.orderedPriorities.compactMap {
+        operationsMapByPriority[$0]
+      }.joined())
     }) ?? []
   }  
   /// Indicates whether there's the next ready Operation.
