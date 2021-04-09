@@ -12,7 +12,8 @@ protocol CZOperationsManagerDelegate: class {
   func operationDidFinish(_ operation: Operation, areAllOperationsFinished: Bool)
 }
 
-/// Thread-safe operations manager.
+/// Thread safe manager that maintains underlying operations, it dequeues the first ready operation from the queue with
+/// ready state / priority / dependencies.
 class CZOperationsManager: NSObject {
   typealias DequeueClosure = (Operation, inout [Operation]) -> Void
   typealias SubOperationQueues = [Operation.QueuePriority: [Operation]]
@@ -35,6 +36,7 @@ class CZOperationsManager: NSObject {
   }
   
   weak var delegate: CZOperationsManagerDelegate?
+  
   var operations: [Operation] {
     return subOperationQueuesLock.readLock({ (subOperationQueues) -> [Operation]? in
       [Operation](CZOperationsManager.orderedPriorities.compactMap { subOperationQueues[$0] }.joined())
@@ -68,8 +70,8 @@ class CZOperationsManager: NSObject {
   func dequeueFirstReadyOperation(dequeueClosure: @escaping DequeueClosure) {
     subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
       for priority in CZOperationsManager.orderedPriorities {
-        // Shouldn't assign to new variable? - Copy: var subqueue = subOperationQueues[priority]
         guard subOperationQueues[priority] != nil else { continue }
+        
         if let operation =  subOperationQueues[priority]?.first(where: {$0.canStart}) {
           subOperationQueues[priority]!.remove(operation)
           self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
@@ -80,6 +82,7 @@ class CZOperationsManager: NSObject {
           break
         }
       }
+      
       return subOperationQueues
     }
   }
@@ -96,7 +99,8 @@ class CZOperationsManager: NSObject {
         }
         subOperationQueues[priority]!.removeAll()
       }
-      //print("\(#function): canceled \(canceledCount) operations.")
+      
+      dbgPrint("\(#function): canceled \(canceledCount) operations.")
       return subOperationQueues
     }
   }
@@ -110,7 +114,10 @@ private extension CZOperationsManager {
 }
 
 extension CZOperationsManager {
-  open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+  open override func observeValue(forKeyPath keyPath: String?,
+                                  of object: Any?,
+                                  change: [NSKeyValueChangeKey : Any]?,
+                                  context: UnsafeMutableRawPointer?) {
     guard let newValue = change?[.newKey] as? Bool,
           let oldValue = change?[.oldKey] as? Bool,
           let operation = object as? Operation,
@@ -133,13 +140,5 @@ extension CZOperationsManager {
   }
   func removeFinishedObserver(from operation: Operation) {
     operation.removeObserver(self, forKeyPath: config.kOperationFinishedKeyPath)
-  }
-}
-
-extension Array where Element: Equatable {
-  mutating func remove(_ object: Element) {
-    if let i = index(of: object) {
-      remove(at: i)
-    }
   }
 }
