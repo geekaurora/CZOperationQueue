@@ -67,6 +67,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C36F22F7262045FB00A14CF4 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				C36F22EF2620455E00A14CF4 /* TestDataManger.swift */,
+				C36F22F02620455E00A14CF4 /* TestOperation.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		C3D3C2072620390700717883 /* Supported Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -107,11 +116,10 @@
 		C3E83818262038EE00432E18 /* CZOperationQueueDemo */ = {
 			isa = PBXGroup;
 			children = (
-				C3E8381D262038EE00432E18 /* ViewController.swift */,
+				C36F22F7262045FB00A14CF4 /* Utils */,
 				C3D3C2142620396400717883 /* CZOperationQueueTester.swift */,
 				C3D3C2152620396400717883 /* NSOperationQueueTester.swift */,
-				C36F22EF2620455E00A14CF4 /* TestDataManger.swift */,
-				C36F22F02620455E00A14CF4 /* TestOperation.swift */,
+				C3E8381D262038EE00432E18 /* ViewController.swift */,
 				C3E83827262038EE00432E18 /* Info.plist */,
 				C3D3C2072620390700717883 /* Supported Files */,
 			);
