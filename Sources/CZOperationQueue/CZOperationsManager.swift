@@ -8,6 +8,7 @@
 import Foundation
 import CZUtils
 
+/// Delegate that gets notified whenever an operation is finished.
 protocol CZOperationsManagerDelegate: class {
   func operationDidFinish(_ operation: Operation, areAllOperationsFinished: Bool)
 }
@@ -17,17 +18,20 @@ protocol CZOperationsManagerDelegate: class {
 class CZOperationsManager: NSObject {
   typealias DequeueClosure = (Operation, inout [Operation]) -> Void
   typealias SubOperationQueues = [Operation.QueuePriority: [Operation]]
-    
+  
+  private enum Constant {
+    static let kOperationFinishedKeyPath = "isFinished"
+  }
+  private static let orderedPriorities: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
   private lazy var subOperationQueuesLock = CZMutexLock(SubOperationQueues())
   private lazy var executingOperationsLock = CZMutexLock([Operation]())
-  private static let orderedPriorities: [Operation.QueuePriority] = [.veryHigh, .high, .normal, .low, .veryLow]
-      
+  
   private var executingOperations: [Operation] {
     return executingOperationsLock.readLock{ $0 } ?? []
   }
   private var hasExceededMaxConcurrentCount: Bool {
-    return executingOperationsLock.readLock({[weak self] in
-      guard let `self` = self else {return false}
+    return executingOperationsLock.readLock({ [weak self] in
+      guard let `self` = self else { return false }
       return $0.count >= self.maxConcurrentOperationCount
     }) ?? false
   }
@@ -35,19 +39,23 @@ class CZOperationsManager: NSObject {
     return operations.contains(where: {$0.canStart})
   }
   
+  /// Delegate that gets notified whenever an operation is finished.
   weak var delegate: CZOperationsManagerDelegate?
-  
+  /// All operations that are currently in the queue.
   var operations: [Operation] {
     return subOperationQueuesLock.readLock({ (subOperationQueues) -> [Operation]? in
       [Operation](CZOperationsManager.orderedPriorities.compactMap { subOperationQueues[$0] }.joined())
     }) ?? []
   }
+  /// Indicates whether there's the next ready Operation.
   var hasNextReadyOperation: Bool {
     return hasReadyOperation && !hasExceededMaxConcurrentCount
   }
+  /// Indicates whether all Operations are finished.
   var areAllOperationsFinished: Bool {
     return operations.isEmpty && executingOperations.isEmpty
   }
+  /// The max count of the concurrent Operation executions.
   let maxConcurrentOperationCount: Int
   
   // MARK: - Initializer
@@ -57,8 +65,9 @@ class CZOperationsManager: NSObject {
     super.init()
   }
   
+  /// Append `operation` to the queue.
   func append(_ operation: Operation) {
-    operation.addObserver(self, forKeyPath: config.kOperationFinishedKeyPath, options: [.new, .old], context: &kOperationObserverContext)
+    operation.addObserver(self, forKeyPath: Constant.kOperationFinishedKeyPath, options: [.new, .old], context: &kOperationObserverContext)
     subOperationQueuesLock.writeLock {
       if $0[operation.queuePriority] == nil {
         $0[operation.queuePriority] = []
@@ -67,13 +76,16 @@ class CZOperationsManager: NSObject {
     }
   }
   
+  /// Dequeue the first ready Operation if exists.
   func dequeueFirstReadyOperation(dequeueClosure: @escaping DequeueClosure) {
     subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
-      for priority in CZOperationsManager.orderedPriorities {
+      
+      for priority in Self.orderedPriorities {
         guard subOperationQueues[priority] != nil else { continue }
         
         if let operation =  subOperationQueues[priority]?.first(where: {$0.canStart}) {
-          subOperationQueues[priority]!.remove(operation)
+          
+          subOperationQueues[priority]?.remove(operation)
           self.executingOperationsLock.writeLock({ (executingOps) -> [Operation]? in
             executingOps.append(operation)
             return executingOps
@@ -82,11 +94,11 @@ class CZOperationsManager: NSObject {
           break
         }
       }
-      
       return subOperationQueues
     }
   }
   
+  /// Cancel all operations from the queue.
   func cancelAllOperations() {
     subOperationQueuesLock.writeLock { (subOperationQueues) -> SubOperationQueues? in
       var canceledCount = 0
@@ -106,13 +118,9 @@ class CZOperationsManager: NSObject {
   }
 }
 
-private var kOperationObserverContext: UInt8 = 0
-private extension CZOperationsManager {
-  private struct config {
-    static let kOperationFinishedKeyPath = "isFinished"
-  }
-}
+// MARK: - KVO
 
+private var kOperationObserverContext: UInt8 = 0
 extension CZOperationsManager {
   open override func observeValue(forKeyPath keyPath: String?,
                                   of object: Any?,
@@ -123,7 +131,7 @@ extension CZOperationsManager {
           let operation = object as? Operation,
           newValue != oldValue,
           context == &kOperationObserverContext,
-          config.kOperationFinishedKeyPath == keyPath else {
+          Constant.kOperationFinishedKeyPath == keyPath else {
       return
     }
     let isInExecutingQueue = self.executingOperationsLock.readLock{ $0.contains(operation) } ?? false
@@ -138,7 +146,8 @@ extension CZOperationsManager {
     
     delegate?.operationDidFinish(operation, areAllOperationsFinished: true)
   }
+  
   func removeFinishedObserver(from operation: Operation) {
-    operation.removeObserver(self, forKeyPath: config.kOperationFinishedKeyPath)
+    operation.removeObserver(self, forKeyPath: Constant.kOperationFinishedKeyPath)
   }
 }
