@@ -126,4 +126,19 @@ private extension CZOperationQueue {
   }
 }
 
+/// MARK: - Operation
+///
+extension Operation {
+  var canStart: Bool {
+    return !isCancelled &&
+      isReady &&
+      !isExecuting &&
+      !hasUnfinishedDependency
+  }
+  
+  var hasUnfinishedDependency: Bool {
+    dbgPrint("hasUnfinishedDependency operation: \(self); dependencies: \(dependencies)")
+    return dependencies.contains { !$0.isFinished }
+  }
+}
 
