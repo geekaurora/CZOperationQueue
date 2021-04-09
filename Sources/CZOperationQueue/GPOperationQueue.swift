@@ -8,7 +8,7 @@
 import Foundation
 
 open class GPOperationQueue: NSObject {
-    var maxConcurrentOperationCount: Int = .max {
+    public var maxConcurrentOperationCount: Int = .max {
         didSet {
             operationsManager.maxConcurrentOperationCount = maxConcurrentOperationCount
         }
@@ -27,7 +27,7 @@ open class GPOperationQueue: NSObject {
     }
     var name: String?
 
-    override init() {
+    public override init() {
         operationsManager = CZOperationsManager()
         jobQueue = DispatchQueue(label: config.label, attributes:  [.concurrent])
         super.init()
