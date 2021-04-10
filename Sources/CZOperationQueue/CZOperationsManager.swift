@@ -117,7 +117,7 @@ internal class CZOperationsManager: NSObject {
     let operations = self.operations
     operations.forEach { $0.cancel() }
     
-    dbgPrint("\(#function): canceled \(operations.count) operations.")
+    dbgPrint("\(#function): cancelled \(operations.count) operations.")
   }
 }
 
