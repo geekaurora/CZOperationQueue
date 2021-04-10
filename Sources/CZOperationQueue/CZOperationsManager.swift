@@ -116,25 +116,8 @@ internal class CZOperationsManager: NSObject {
   func cancelAllOperations() {
     let operations = self.operations
     operations.forEach { $0.cancel() }
-    dbgPrint("\(#function): canceled \(operations.count) operations.")
     
-//    operationsMapByPriorityLock.readLock { (operationsMapByPriority) -> OperationsMapByPriority? in
-//      var canceledCount = 0
-//      for priority in Self.orderedPriorities {
-//        guard operationsMapByPriority[priority] != nil else {
-//          continue
-//        }
-//        canceledCount += operationsMapByPriority[priority]!.count
-//        operationsMapByPriority[priority]?.forEach { [weak self] in
-//          $0.cancel()
-//          //self?.removeFinishedObserver(from: $0)
-//        }
-//        //operationsMapByPriority[priority]?.removeAll()
-//      }
-//
-//      dbgPrint("\(#function): canceled \(canceledCount) operations.")
-//      return operationsMapByPriority
-//    }
+    dbgPrint("\(#function): canceled \(operations.count) operations.")
   }
 }
 
