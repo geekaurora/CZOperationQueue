@@ -1,8 +1,9 @@
 import Foundation
 import CZUtils
 
-public class TestOperation: Operation {
-  private var dataManager: TestDataManager
+// public class TestOperation: Operation {
+public class TestOperation: ConcurrentBlockOperation {
+private var dataManager: TestDataManager
   let sleepInterval: TimeInterval
   let jobIndex: Int
   var isExecuted = false
@@ -21,9 +22,13 @@ public class TestOperation: Operation {
   // Should cancel execution code if it's concurrent
   public override func cancel() {
     super.cancel()
+    
+    // Call start() to mark state as isFinished.
+    start()
+    finish()
   }
   
-  private func _execute() {
+  public override func _execute() {
     guard !isCancelled else {
       dbgPrint("jobIndex \(jobIndex): was cancelled!")
       return
@@ -33,6 +38,8 @@ public class TestOperation: Operation {
     isExecuted = true
     dataManager.append(jobIndex)
     dbgPrint("jobIndex \(jobIndex): finished!")
+    
+    finish()
   }
   
   public override var description: String {

@@ -34,7 +34,7 @@ final class CZOperationQueuePriorityTests: XCTestCase {
     // Add operations.
     czOperationQueue.addOperations(
       operations,
-      allOperationsFinished: {
+      allOperationsFinishedClosure: {
         dbgPrint("dataManager: \(self.dataManager)")
         
         // Verify `operations` have been executed.
@@ -105,7 +105,7 @@ final class CZOperationQueuePriorityTests: XCTestCase {
     // Add operations.
     czOperationQueue.addOperations(
       operations,
-      allOperationsFinished: {
+      allOperationsFinishedClosure: {
         dbgPrint("dataManager: \(self.dataManager)")
         
         // Verify `operations` have been executed.
@@ -133,7 +133,7 @@ final class CZOperationQueuePriorityTests: XCTestCase {
       })
     
     // Add Operation with .veryHigh  priority after 1 sec.
-    DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {
+    DispatchQueue.asyncOnBackgroundAfter(seconds: 1) {
       let operation = TestOperation(11, dataManager: self.dataManager)
       operation.queuePriority = .veryHigh
       self.czOperationQueue.addOperation(operation)
@@ -160,7 +160,7 @@ final class CZOperationQueuePriorityTests: XCTestCase {
     // Add operations.
     czOperationQueue.addOperations(
       operations,
-      allOperationsFinished: {
+      allOperationsFinishedClosure: {
         dbgPrint("dataManager: \(self.dataManager)")
         
         // Verify `operations` have been executed.
@@ -178,6 +178,49 @@ final class CZOperationQueuePriorityTests: XCTestCase {
         XCTAssertTrue(
           resultIndexOfOperation0 < resultIndexOfOperation8,
           "Incorrect executing order for dependency! resultIndexOfOperation0 = \(resultIndexOfOperation0), \nresultIndexOfOperation8 = \(resultIndexOfOperation8)")
+        
+        // Fulfill the expectatation.
+        expectation.fulfill()
+      })
+    
+    // Wait for expectatation.
+    waitForExpectatation()
+  }  
+  
+  func testAddOperationWithDependencyAfterCancel() {
+    let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
+    
+    // Init operations.
+    let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
+    operations[5].queuePriority = .veryLow
+    operations[1].queuePriority = .low
+    operations[6].queuePriority = .veryHigh
+    
+    // Set operations[0] as operations[8]'s dependency.
+    operations[8].addDependency(operations[5])
+    
+    // Cancel operations[8]'s dependency operations[5] after 1 sec.
+    DispatchQueue.asyncOnBackgroundAfter(seconds: 1) {
+      operations[5].cancel()
+    }
+    
+    // Add operations.
+    czOperationQueue.addOperations(
+      operations,
+      allOperationsFinishedClosure: {
+        dbgPrint("dataManager: \(self.dataManager)")
+        
+        // Verify operations[5] has not been executed.
+        XCTAssertTrue(!operations[5].isExecuted, "operations[0] should have not been executed - cancelled.")
+        
+        // Verify operations[8] has been executed.
+        XCTAssertTrue(operations[8].isExecuted, "operations[8] should have been executed.")
+        
+        // Verify results of dataManager are correct.
+        var expected = Set(MockData.testIndexesArray)
+        expected.remove(5)
+        let actual = Set(self.dataManager.results())
+        XCTAssertEqual(expected, actual, "Results are incorrect! expected = \(expected), \nactual=\(actual)")
         
         // Fulfill the expectatation.
         expectation.fulfill()
