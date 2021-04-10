@@ -157,14 +157,19 @@ extension CZOperationsManager {
     if keyPath == Constant.kOperationCancelledKeyPath {
       
     } else if keyPath == Constant.kOperationFinishedKeyPath {
+      let isCancelled = operation.isCancelled      
       // Verify that `operation` is in executingOperations.
       let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
-      if !isOperationExecuting {
-        assertionFailure("`operation` should be in executingOperations.")
-        return
+      assert(isOperationExecuting || isCancelled, "`operation` should be in executingOperations.")
+      
+      if isCancelled {
+        // Remove `operation` from the queue if is cancelled.
+        self.remove(operation)
+      } else {
+        // Remove `operation` from `executingOperations`.
+        self.executingOperationsLock.writeLock { $0.remove(operation) }
       }
-      // Remove `operation` from `executingOperations`.
-      self.executingOperationsLock.writeLock { $0.remove(operation) }
+      
       // Remove self from KVO observers of `operation`.
       removeFinishedObserver(from: operation)
       // Notify delegate that `operation` is finished.
@@ -174,5 +179,16 @@ extension CZOperationsManager {
   
   func removeFinishedObserver(from operation: Operation) {
     operation.removeObserver(self, forKeyPath: Constant.kOperationFinishedKeyPath)
+  }
+}
+
+// MARK: - Private methods
+
+private extension CZOperationsManager {
+  /// Remove `operation` from the queue.
+  func remove(_ operation: Operation) {
+    operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> Void? in
+      operationsMapByPriority[operation.queuePriority]?.remove(operation)
+    }
   }
 }

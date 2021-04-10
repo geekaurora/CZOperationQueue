@@ -185,8 +185,7 @@ final class CZOperationQueuePriorityTests: XCTestCase {
     
     // Wait for expectatation.
     waitForExpectatation()
-  }
-  
+  }  
   
   func testAddOperationWithDependencyAfterCancel() {
     let (waitForExpectatation, expectation) = CZTestUtils.waitWithInterval(Constant.timeOut, testCase: self)
@@ -204,7 +203,6 @@ final class CZOperationQueuePriorityTests: XCTestCase {
     DispatchQueue.asyncOnBackgroundAfter(seconds: 1) {
       operations[5].cancel()
     }
-    // operations[5].cancel()
     
     // Add operations.
     czOperationQueue.addOperations(
