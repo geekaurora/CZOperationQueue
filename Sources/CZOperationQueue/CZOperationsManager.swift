@@ -21,7 +21,6 @@ internal class CZOperationsManager: NSObject {
     
   private enum Constant {
     static let kOperationFinishedKeyPath = #keyPath(Operation.isFinished)
-    static let kOperationCancelledKeyPath = #keyPath(Operation.isCancelled)
   }
   private static let orderedPriorities: [Operation.QueuePriority] = [
     .veryHigh, .high, .normal, .low, .veryLow
@@ -75,13 +74,11 @@ internal class CZOperationsManager: NSObject {
   
   /// Append `operation` to the queue.
   func append(_ operation: Operation) {
-    [Constant.kOperationFinishedKeyPath, Constant.kOperationCancelledKeyPath].forEach { keyPath in
-      operation.addObserver(
-        self,
-        forKeyPath: keyPath,
-        options: [.new, .old],
-        context: &kOperationObserverContext)
-    }
+    operation.addObserver(
+      self,
+      forKeyPath: Constant.kOperationFinishedKeyPath,
+      options: [.new, .old],
+      context: &kOperationObserverContext)
     
     operationsMapByPriorityLock.writeLock {
       if $0[operation.queuePriority] == nil {
@@ -149,32 +146,29 @@ extension CZOperationsManager {
           let oldValue = change?[.oldKey] as? Bool,
           let operation = object as? Operation,
           newValue != oldValue,
-          context == &kOperationObserverContext else {
+          context == &kOperationObserverContext,
+          keyPath == Constant.kOperationFinishedKeyPath else {
       return
     }
     dbgPrintWithFunc(self, "isFinished operation = \(operation), isCancelled = \(operation.isCancelled)")
     
-    if keyPath == Constant.kOperationCancelledKeyPath {
-      
-    } else if keyPath == Constant.kOperationFinishedKeyPath {
-      let isCancelled = operation.isCancelled      
-      // Verify that `operation` is in executingOperations.
-      let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
-      assert(isOperationExecuting || isCancelled, "`operation` should be in executingOperations.")
-      
-      if isCancelled {
-        // Remove `operation` from the queue if is cancelled.
-        self.remove(operation)
-      } else {
-        // Remove `operation` from `executingOperations`.
-        self.executingOperationsLock.writeLock { $0.remove(operation) }
-      }
-      
-      // Remove self from KVO observers of `operation`.
-      removeFinishedObserver(from: operation)
-      // Notify delegate that `operation` is finished.
-      delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
+    // Verify that `operation` is in executingOperations.
+    let isCancelled = operation.isCancelled
+    let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
+    assert(isOperationExecuting || isCancelled, "`operation` should be in executingOperations.")
+    
+    if isCancelled {
+      // Remove `operation` from the queue if is cancelled.
+      self.remove(operation)
+    } else {
+      // Remove `operation` from `executingOperations`.
+      self.executingOperationsLock.writeLock { $0.remove(operation) }
     }
+    
+    // Remove self from KVO observers of `operation`.
+    removeFinishedObserver(from: operation)
+    // Notify delegate that `operation` is finished.
+    delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
   }
   
   func removeFinishedObserver(from operation: Operation) {
