@@ -1,6 +1,6 @@
 # CZOperationQueue
 
-Rewritten custom OperationQueue with GCD - DispatchQueue (Without using NSOperationQueue).
+Homemade OperationQueue implemented with GCD - DispatchQueue (Without using NSOperationQueue).
 
 ## Functionality
 

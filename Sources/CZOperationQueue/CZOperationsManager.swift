@@ -13,14 +13,15 @@ internal protocol CZOperationsManagerDelegate: class {
   func operationDidFinish(_ operation: Operation, areAllOperationsFinished: Bool)
 }
 
-/// Thread safe manager that maintains underlying operations, it dequeues the first ready operation from the queue with
+/// Thread safe manager that maintains underlying operations, it dequeues the first ready operation from the queue based on
 /// ready state / priority / dependencies.
 internal class CZOperationsManager: NSObject {
   typealias DequeueOperationClosure = (Operation, inout [Operation]) -> Void
   typealias OperationsMapByPriority = [Operation.QueuePriority: [Operation]]
     
   private enum Constant {
-    static let kOperationFinishedKeyPath = "isFinished"
+    static let kOperationFinishedKeyPath = #keyPath(Operation.isFinished)
+    static let kOperationCancelledKeyPath = #keyPath(Operation.isCancelled)
   }
   private static let orderedPriorities: [Operation.QueuePriority] = [
     .veryHigh, .high, .normal, .low, .veryLow
@@ -58,25 +59,29 @@ internal class CZOperationsManager: NSObject {
   }
   /// Indicates whether all Operations are finished.
   var areAllOperationsFinished: Bool {
+    dbgPrint("areAllOperationsFinished() - operations = \(operations)")
     return operations.isEmpty && executingOperations.isEmpty
   }
+  
   /// The max count of the concurrent Operation executions.
   let maxConcurrentOperationCount: Int
   
   // MARK: - Initializer
   
-  init(maxConcurrentOperationCount: Int = .max) {
+  init(maxConcurrentOperationCount: Int) {
     self.maxConcurrentOperationCount = maxConcurrentOperationCount
     super.init()
   }
   
   /// Append `operation` to the queue.
   func append(_ operation: Operation) {
-    operation.addObserver(
-      self,
-      forKeyPath: Constant.kOperationFinishedKeyPath,
-      options: [.new, .old],
-      context: &kOperationObserverContext)
+    [Constant.kOperationFinishedKeyPath, Constant.kOperationCancelledKeyPath].forEach { keyPath in
+      operation.addObserver(
+        self,
+        forKeyPath: keyPath,
+        options: [.new, .old],
+        context: &kOperationObserverContext)
+    }
     
     operationsMapByPriorityLock.writeLock {
       if $0[operation.queuePriority] == nil {
@@ -144,22 +149,27 @@ extension CZOperationsManager {
           let oldValue = change?[.oldKey] as? Bool,
           let operation = object as? Operation,
           newValue != oldValue,
-          context == &kOperationObserverContext,
-          Constant.kOperationFinishedKeyPath == keyPath else {
+          context == &kOperationObserverContext else {
       return
     }
-    // Verify that `operation` state isn't executing.
-    let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
-    if !isOperationExecuting {
-      assertionFailure("Error - attemped to cancel operation that isn't in executing queue.")
-      return
+    dbgPrintWithFunc(self, "isFinished operation = \(operation), isCancelled = \(operation.isCancelled)")
+    
+    if keyPath == Constant.kOperationCancelledKeyPath {
+      
+    } else if keyPath == Constant.kOperationFinishedKeyPath {
+      // Verify that `operation` is in executingOperations.
+      let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
+      if !isOperationExecuting {
+        assertionFailure("`operation` should be in executingOperations.")
+        return
+      }
+      // Remove `operation` from `executingOperations`.
+      self.executingOperationsLock.writeLock { $0.remove(operation) }
+      // Remove self from KVO observers of `operation`.
+      removeFinishedObserver(from: operation)
+      // Notify delegate that `operation` is finished.
+      delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
     }
-    // Remove `operation` from `executingOperations`.
-    self.executingOperationsLock.writeLock{ $0.remove(operation) }
-    // Remove self from KVO observers of `operation`.
-    removeFinishedObserver(from: operation)
-    // Notify delegate that`operation` is finished.
-    delegate?.operationDidFinish(operation, areAllOperationsFinished: areAllOperationsFinished)
   }
   
   func removeFinishedObserver(from operation: Operation) {

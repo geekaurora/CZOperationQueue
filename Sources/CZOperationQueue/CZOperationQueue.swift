@@ -24,14 +24,14 @@ open class CZOperationQueue: NSObject {
   private var operations: [Operation] {
     return operationsManager.operations
   }
-  private enum Constant {
-    static let maxConcurrentOperationCount = Int.max
-    static let label = "com.CZOperationQueue.underlyingQueue"
+  public enum Constant {
+    public static let maxConcurrentOperationCount = Int.max
+    public static let label = "com.CZOperationQueue.underlyingQueue"
   }
 
   /// Closure that gets called when all operations have been finished.
-  public typealias AllOperationsFinished = () -> Void
-  private var allOperationsFinished: AllOperationsFinished?
+  public typealias AllOperationsFinishedClosure = () -> Void
+  private var allOperationsFinishedClosure: AllOperationsFinishedClosure?
   /// The count of operations currently in the queue.
   var operationCount: Int {
     return operations.count
@@ -45,13 +45,13 @@ open class CZOperationQueue: NSObject {
   
   // MARK: - Initializer
   
-  public init(maxConcurrentOperationCount: Int = .max) {
+  public init(maxConcurrentOperationCount: Int = Constant.maxConcurrentOperationCount) {
     operationsManager = CZOperationsManager(
       maxConcurrentOperationCount: maxConcurrentOperationCount
     )
     jobQueue = DispatchQueue(
       label: Constant.label,
-      attributes:  [.concurrent])
+      attributes: [.concurrent])
     super.init()
     
     operationsManager.delegate = self
@@ -64,19 +64,20 @@ open class CZOperationQueue: NSObject {
   }
   
   /// Adds the specified `operations` to the operation queue.
-  /// Eash operation will execute when it reaches the queue head based on its priority / readiness / dependencies.
+  /// Each operation will execute when it reaches the queue head based on its priority / readiness / dependencies.
   ///
   /// - Parameters:
   ///   - operations: operations to be executed.
   ///   - waitUntilFinished: Indicates whether should wait on the current thread until all `operations` finish.
+  ///   - allOperationsFinishedClosure: Closure that gets called when all operations have been finished .
   open func addOperations(_ operations: [Operation],
                           waitUntilFinished: Bool = false,
-                          allOperationsFinished: AllOperationsFinished? = nil) {
+                          allOperationsFinishedClosure: AllOperationsFinishedClosure? = nil) {
     assert(
-      !waitUntilFinished || allOperationsFinished == nil,
-      "Should only set `waitUntilFinished` to true or `allOperationsFinished`.")
+      !waitUntilFinished || allOperationsFinishedClosure == nil,
+      "Should only set waitUntilFinished to true or allOperationsFinishedClosure to non-nil.")
     
-    self.allOperationsFinished = allOperationsFinished
+    self.allOperationsFinishedClosure = allOperationsFinishedClosure
     
     operations.forEach {
       _addOperation($0, shouldRunNextOperations: false)
@@ -88,7 +89,7 @@ open class CZOperationQueue: NSObject {
     }
   }
   
-  /// Cancels all queued and executing operations.
+  /// Cancels all operations in the queue.
   open func cancelAllOperations() {
     operationsManager.cancelAllOperations()
   }
@@ -111,13 +112,15 @@ extension CZOperationQueue: CZOperationsManagerDelegate {
 
 private extension CZOperationQueue {
   func notifyOperationsFinished() {
-    allOperationsFinished?()
+    allOperationsFinishedClosure?()
     waitingSemaphore.signal()
   }
   
   func _addOperation(_ operation: Operation,
                      shouldRunNextOperations: Bool = true) {
-    operationsManager.append(operation)
+    if !operation.isFinished {
+      operationsManager.append(operation)
+    }
     
     if shouldRunNextOperations {
       runNextReadyOperations()
@@ -137,6 +140,14 @@ private extension CZOperationQueue {
           }
         }
       }
+    }
+    
+    notifyOperationsFinishedIfNeeded()
+  }
+  
+  func notifyOperationsFinishedIfNeeded() {
+    if operationsManager.areAllOperationsFinished {
+      notifyOperationsFinished()
     }
   }
 }

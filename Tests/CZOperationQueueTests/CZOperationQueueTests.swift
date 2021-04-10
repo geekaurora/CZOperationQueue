@@ -27,7 +27,7 @@ final class CZOperationQueueTests: XCTestCase {
     let operation = TestOperation(0, dataManager: dataManager)
     czOperationQueue.addOperations(
       [operation],
-      allOperationsFinished: {
+      allOperationsFinishedClosure: {
         dbgPrint("dataManager: \(self.dataManager)")
         
         // Verify `operation` has been executed.
@@ -46,7 +46,7 @@ final class CZOperationQueueTests: XCTestCase {
     let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
     czOperationQueue.addOperations(
       operations,
-      allOperationsFinished: {
+      allOperationsFinishedClosure: {
         dbgPrint("dataManager: \(self.dataManager)")
         
         // Verify `operations` have been executed.
@@ -73,7 +73,7 @@ final class CZOperationQueueTests: XCTestCase {
     let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
     czOperationQueue.addOperations(
       operations,
-      allOperationsFinished: {
+      allOperationsFinishedClosure: {
         dbgPrint("dataManager: \(self.dataManager)")
         
         // Verify `operations` shound't have been all executed.
