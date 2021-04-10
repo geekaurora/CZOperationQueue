@@ -58,7 +58,6 @@ internal class CZOperationsManager: NSObject {
   }
   /// Indicates whether all Operations are finished.
   var areAllOperationsFinished: Bool {
-    dbgPrint("areAllOperationsFinished() - operations = \(operations)")
     return operations.isEmpty && executingOperations.isEmpty
   }
   
