@@ -58,6 +58,7 @@ internal class CZOperationsManager: NSObject {
   }
   /// Indicates whether all Operations are finished.
   var areAllOperationsFinished: Bool {
+    dbgPrint("areAllOperationsFinished() - operations = \(operations)")
     return operations.isEmpty && executingOperations.isEmpty
   }
   
@@ -113,23 +114,10 @@ internal class CZOperationsManager: NSObject {
   
   /// Cancel all operations from the queue.
   func cancelAllOperations() {
-    operationsMapByPriorityLock.writeLock { (operationsMapByPriority) -> OperationsMapByPriority? in
-      var canceledCount = 0
-      for priority in Self.orderedPriorities {
-        guard operationsMapByPriority[priority] != nil else {
-          continue
-        }
-        canceledCount += operationsMapByPriority[priority]!.count
-        operationsMapByPriority[priority]?.forEach{ [weak self] in
-          $0.cancel()
-          self?.removeFinishedObserver(from: $0)
-        }
-        operationsMapByPriority[priority]?.removeAll()
-      }
-      
-      dbgPrint("\(#function): canceled \(canceledCount) operations.")
-      return operationsMapByPriority
-    }
+    let operations = self.operations
+    operations.forEach { $0.cancel() }
+    
+    dbgPrint("\(#function): cancelled \(operations.count) operations.")
   }
 }
 
@@ -149,7 +137,7 @@ extension CZOperationsManager {
           keyPath == Constant.kOperationFinishedKeyPath else {
       return
     }
-    dbgPrintWithFunc(self, "isFinished operation = \(operation), isCancelled = \(operation.isCancelled)")
+    dbgPrintWithFunc(self, "isFinished operation = \(operation), isCancelled = \(operation.isCancelled) operations = \n\(operations)")
     
     let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
     if isOperationExecuting {

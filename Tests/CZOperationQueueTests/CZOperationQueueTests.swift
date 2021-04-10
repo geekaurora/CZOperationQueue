@@ -71,6 +71,7 @@ final class CZOperationQueueTests: XCTestCase {
     
     // Add operations.
     let operations = MockData.testIndexesArray.map { TestOperation($0, dataManager: dataManager) }
+    
     czOperationQueue.addOperations(
       operations,
       allOperationsFinishedClosure: {
@@ -89,6 +90,7 @@ final class CZOperationQueueTests: XCTestCase {
     
     // Call `cancelAllOperations()` after 1 sec.
     DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {
+      dbgPrint("Call czOperationQueue.cancelAllOperations().")
       self.czOperationQueue.cancelAllOperations()
     }
     
