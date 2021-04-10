@@ -152,17 +152,13 @@ extension CZOperationsManager {
     }
     dbgPrintWithFunc(self, "isFinished operation = \(operation), isCancelled = \(operation.isCancelled)")
     
-    // Verify that `operation` is in executingOperations.
-    let isCancelled = operation.isCancelled
     let isOperationExecuting = executingOperationsLock.readLock { $0.contains(operation) } ?? false
-    assert(isOperationExecuting || isCancelled, "`operation` should be in executingOperations.")
-    
-    if isCancelled {
-      // Remove `operation` from the queue if is cancelled.
-      self.remove(operation)
-    } else {
+    if isOperationExecuting {
       // Remove `operation` from `executingOperations`.
       self.executingOperationsLock.writeLock { $0.remove(operation) }
+    } else if operation.isCancelled {
+      // Remove `operation` from the queue if is cancelled.
+      self.remove(operation)
     }
     
     // Remove self from KVO observers of `operation`.
